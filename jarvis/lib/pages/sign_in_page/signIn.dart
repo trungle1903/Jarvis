@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jarvis/pages/forgot_password_page/forgotPassword.dart';
-
-import '../sign_up_page/signUp.dart';
+import 'package:jarvis/pages/chat_page/chatPage.dart';
+import 'package:jarvis/pages/sign_up_page/signUp.dart';
 
 class SignInApp extends StatelessWidget {
   const SignInApp({super.key});
@@ -27,8 +27,6 @@ class _LoginFormState extends State<LoginForm> {
   void submit() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      //API request
-      print('Username: $_uname, Password: $_pword');
 
       Navigator.push(
         context,

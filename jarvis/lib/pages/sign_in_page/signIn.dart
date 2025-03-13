@@ -44,7 +44,7 @@ class _LoginFormState extends State<LoginForm> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Step AI',
+              'Jarvis',
               style: TextStyle(
                 fontSize: 24,
                 color: Color(0xFF172B4D),
@@ -119,7 +119,7 @@ class _LoginFormState extends State<LoginForm> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('New to Step AI? ', style: TextStyle(fontSize: 14)),
+                Text('New to Jarvis? ', style: TextStyle(fontSize: 14)),
                 GestureDetector(
                   onTap: signUpOnTap,
                   child: Text(
@@ -133,7 +133,6 @@ class _LoginFormState extends State<LoginForm> {
         ),
       ),
     );
-    throw UnimplementedError();
   }
 
   void signUpOnTap() {

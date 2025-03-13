@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:step_ai/components/appNameWidget.dart';
-import 'package:step_ai/pages/personal_page/widgets/searchBarWidget.dart';
-import 'package:step_ai/pages/plan_pricing_page/planPricingPage.dart';
-import 'package:step_ai/pages/prompt_list_page/promptList.dart';
-import 'package:step_ai/pages/sign_in_page/signIn.dart';
+import 'package:jarvis/components/appNameWidget.dart';
+import 'package:jarvis/pages/personal_page/widgets/searchBarWidget.dart';
+import 'package:jarvis/pages/plan_pricing_page/planPricingPage.dart';
+import 'package:jarvis/pages/prompt_list_page/promptList.dart';
+import 'package:jarvis/pages/sign_in_page/signIn.dart';
 
 import '../pages/chat_page/chatPage.dart';
 import '../pages/email_page/emailPage.dart';

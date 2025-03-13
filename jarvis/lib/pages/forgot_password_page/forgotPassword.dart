@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/pages/sign_up_page/signUp.dart';
-
 import 'package:jarvis/pages/chat_page/chatPage.dart';
-import 'package:jarvis/pages/personal_page/personalPage.dart';
+
 class ForgotPasswordApp extends StatelessWidget {
   const ForgotPasswordApp({super.key});
 

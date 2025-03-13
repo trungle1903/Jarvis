@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:jarvis/pages/forgot_password_page/forgotPassword.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
 import 'package:jarvis/pages/sign_up_page/signUp.dart';
@@ -37,7 +36,6 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Form(
@@ -139,14 +137,11 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   void signUpOnTap() {
-    print('Switch to Sign Up screen!');
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => SignUpApp()),
     );
   }
 
-  void forgotPasswordOnTap() {
-    print('Switch to Forgot Password screen!');
-  }
+  void forgotPasswordOnTap() {}
 }

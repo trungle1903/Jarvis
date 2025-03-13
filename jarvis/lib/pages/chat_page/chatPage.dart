@@ -16,10 +16,10 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   List<MessageTile> messages = [];
   final List<Map<String, String>> _aiModels = [
-    {'name': 'Gemini 1.5 Flash', 'logo': 'lib/assets/imgs/gemini.png'},
-    {'name': 'Chat GPT 4o', 'logo': 'lib/assets/imgs/gpt.png'},
+    {'name': 'Gemini 1.5 Flash', 'logo': 'assets/logos/gemini.png'},
+    {'name': 'Chat GPT 4o', 'logo': 'assets/logos/gpt.png'},
   ];
-  String _currentModelPathLogo = "lib/assets/imgs/gpt.png";
+  String _currentModelPathLogo = "assets/logos/gpt.png";
 
   void onSendMessage(String sendMessage) {
     setState(() {

@@ -13,9 +13,36 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Step AI',
+      title: 'Jarvis',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        textTheme: TextTheme(
+          displayLarge: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black
+          ),
+          bodyMedium: const TextStyle(
+            color: Colors.black
+          ),
+          displaySmall: const TextStyle(
+            color: Colors.black
+          )
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.black, width: 1),
+          ),
+          hoverColor: Colors.blue[100],
+        ),
       ),
       debugShowCheckedModeBanner: false,
       routes: Routes.routes,

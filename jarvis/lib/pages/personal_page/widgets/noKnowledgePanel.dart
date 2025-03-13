@@ -10,7 +10,7 @@ class NoKnowledgePanel extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image(image: AssetImage('lib/assets/imgs/file.png'), width: 300),
+        Image(image: AssetImage('assets/imgs/no-results.png'), width: 300),
         Text(
           "No data",
           style: GoogleFonts.jetBrainsMono(

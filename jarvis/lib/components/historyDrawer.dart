@@ -24,10 +24,14 @@ class HistoryDrawer extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(8.0),
               children: [
-                _buildHistoryItem("Dummy chat 0", "22 minutes ago", context),
                 _buildHistoryItem(
-                  "Dummy chat 1",
-                  "3 hours ago",
+                  "Dumb dumb chat 0",
+                  "30 minutes ago",
+                  context,
+                ),
+                _buildHistoryItem(
+                  "Dumb dumb chat 1",
+                  "4 hours ago",
                   context,
                   isCurrent: true,
                 ),

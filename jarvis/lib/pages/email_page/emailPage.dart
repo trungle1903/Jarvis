@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/components/dropdownAI.dart';
-import 'package:jarvis/pages/email_page/widgets/emailOptions.dart';
 import 'package:jarvis/components/messageTile.dart';
-
-import '../../components/chatBar.dart';
+import 'package:jarvis/components/chatBar.dart';
+import 'package:jarvis/constants/colors.dart';
+import 'package:jarvis/pages/email_page/widgets/emailOptions.dart';
 
 class EmailPage extends StatefulWidget {
   const EmailPage({super.key});
@@ -15,17 +15,24 @@ class EmailPage extends StatefulWidget {
 
 class _EmailPageState extends State<EmailPage> {
   List<MessageTile> messages = [];
+  final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String>> _aiModels = [
-    {'name': 'Gemini 1.5 Flash', 'logo': 'lib/core/assets/imgs/gemini.png'},
-    {'name': 'Chat GPT 4o', 'logo': 'lib/core/assets/imgs/gpt.png'},
+    {'name': 'Gemini 1.5 Flash', 'logo': 'assets/logos/gemini.png'},
+    {'name': 'Chat GPT 4o', 'logo': 'assets/logos/gpt.png'},
   ];
-  String _currentModelPathLogo = "lib/core/assets/imgs/gpt.png";
+  String _currentModelPathLogo = "assets/logos/gpt.png";
+  String _currentModelName = "Chat GPT 4o";
 
   void onSendMessage(String sendMessage) {
     setState(() {
       messages.add(MessageTile(isAI: false, message: sendMessage));
       messages.add(
-        MessageTile(isAI: true, message: "OK", aiLogo: _currentModelPathLogo),
+        MessageTile(
+          isAI: true,
+          message: "OK",
+          aiLogo: _currentModelPathLogo,
+          aiName: _currentModelName,
+        ),
       );
     });
   }
@@ -33,70 +40,75 @@ class _EmailPageState extends State<EmailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const SideBar(selectedIndex: 3),
       appBar: AppBar(
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Email Generator",
-              style: GoogleFonts.jetBrainsMono(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: MediaQuery.of(context).size.width * 0.05,
-              ),
-            ),
-          ],
+        backgroundColor: Colors.white,
+        elevation: 1,
+        title: const Text(
+          "Email Generator",
+          style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(5),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  return messages[index];
-                },
-              ),
-            ),
-            //EmailOptionTile(icon: Icons.abc_sharp,label: "ABC",onTap: (){},)
-
-            //EmailOptions(),
-            // ChatBar(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
+        children: [
+          Expanded(
+            child:
+                messages.isEmpty
+                    ? const Center(child: Text("Start generating emails..."))
+                    : ListView.builder(
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        return messages[index];
+                      },
+                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            child: Row(
               children: [
-                EmailOptions(),
-                const SizedBox(height: 5),
-                // ChatBar(),
-                // DropdownAI(),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(child: ChatBar(onSendMessage: onSendMessage)),
-                      const SizedBox(width: 10),
-                      DropdownAI(
-                        aiModels: _aiModels,
-                        onChange: (nameModel) {
-                          _currentModelPathLogo =
-                              _aiModels.firstWhere(
-                                (element) => element['name'] == nameModel,
-                              )['logo']!;
-                        },
-                      ),
-                    ],
-                  ),
+                Expanded(child: EmailOptions()),
+                const SizedBox(width: 10),
+                DropdownAI(
+                  aiModels: _aiModels,
+                  onChange: (nameModel) {
+                    setState(() {
+                      _currentModelName = _currentModelName;
+                      _currentModelPathLogo =
+                          _aiModels.firstWhere(
+                            (element) => element['name'] == nameModel,
+                          )['logo']!;
+                    });
+                  },
                 ),
-                const SizedBox(height: 20),
               ],
             ),
-          ],
-        ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: TextField(
+              controller: _messageController,
+              decoration: InputDecoration(
+                hintText: "Ask me anything, press '/' for prompts...",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 15,
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.send, color: jvBlue),
+                  onPressed: () {
+                    onSendMessage(_messageController.text);
+                  },
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }

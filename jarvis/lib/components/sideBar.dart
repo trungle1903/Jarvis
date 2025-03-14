@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/pages/bots_page.dart';
+import 'package:jarvis/pages/email_page/emailPage.dart';
 import 'package:jarvis/pages/group_page.dart';
+import 'package:jarvis/pages/sign_in_page/signIn.dart';
 
 class SideBar extends StatelessWidget {
   final int selectedIndex; // Get selected index from parent
@@ -68,8 +70,17 @@ class SideBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
-                icon: const Icon(Icons.mail_outline, color: Colors.grey),
+                icon: const Icon(Icons.person, color: Colors.grey),
                 onPressed: () {},
+              ),
+              IconButton(
+                icon: const Icon(Icons.mail_outline, color: Colors.grey),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const EmailPage()),
+                  );
+                },
               ),
               IconButton(
                 icon: const Icon(Icons.help_outline, color: Colors.grey),
@@ -81,7 +92,12 @@ class SideBar extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.grey),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignInApp()),
+                  );
+                },
               ),
             ],
           ),

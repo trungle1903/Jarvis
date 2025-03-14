@@ -8,8 +8,13 @@ class ForgotPasswordApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return MaterialApp(home: Scaffold(body: ForgotPasswordForm()), debugShowCheckedModeBanner: false);
+    return MaterialApp(
+      home: Scaffold(
+        body: ForgotPasswordForm(),
+        backgroundColor: Colors.white,
+      ),
+      debugShowCheckedModeBanner: false,
+    );
   }
 }
 
@@ -20,17 +25,16 @@ class ForgotPasswordForm extends StatefulWidget {
 
 class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
   final _formKey = GlobalKey<FormState>();
-
   String _email = '';
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(horizontal: 20), 
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
+    return Center(
+      child: Container(
+        width: 400,
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -106,6 +110,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       ),
     );
   }
+
   void submit() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();

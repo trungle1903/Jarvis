@@ -6,7 +6,7 @@ import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/bots/create_bot_dialog.dart';
-import 'package:jarvis/pages/prompt_library.dart';
+import 'package:jarvis/pages/promp/prompt_library.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key, this.chatName = "Chat"});

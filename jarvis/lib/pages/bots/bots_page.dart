@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/components/sideBar.dart';
+import 'package:jarvis/pages/bots/create_bot_dialog.dart';
 
 class BotsPage extends StatefulWidget {
   const BotsPage({super.key});
@@ -64,19 +66,14 @@ class _BotsPageState extends State<BotsPage> {
                   ),
 
                   // Create Bot Button
-                  ElevatedButton.icon(
+                  GradientElevatedButton(
                     onPressed: () {
-                      // Add bot creation functionality here
+                      showDialog(
+                        context: context,
+                        builder: (context) => CreateBotDialog(),
+                      );
                     },
-                    icon: const Icon(Icons.add),
-                    label: const Text("+ Create Bot"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+                    text: '+  Create Bot',
                   ),
                 ],
               ),

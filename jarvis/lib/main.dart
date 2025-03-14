@@ -15,13 +15,18 @@ class MyApp extends StatelessWidget {
       title: 'Jarvis',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.white,
         textTheme: TextTheme(
-          displayLarge: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-          bodyMedium: const TextStyle(color: Colors.black),
           displaySmall: const TextStyle(color: Colors.black),
+          displayMedium: const TextStyle(color: Colors.black),
+          displayLarge: const TextStyle(fontWeight: FontWeight.bold,color: Colors.black),
+          bodySmall: const TextStyle(color: Colors.black),
+          bodyMedium: const TextStyle(color: Colors.black),
+          bodyLarge: const TextStyle(color: Colors.black),
+          titleSmall: const TextStyle(color: Colors.black),
+          titleMedium: const TextStyle(color: Colors.black),
+          titleLarge: const TextStyle(color: Colors.black),
+          
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
@@ -37,6 +42,14 @@ class MyApp extends StatelessWidget {
             borderSide: BorderSide(color: Colors.black, width: 1),
           ),
           hoverColor: Colors.blue[100],
+        ),
+        dialogTheme: DialogTheme(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: Colors.white,
+          titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+          contentTextStyle: TextStyle(fontSize: 16, color: Colors.black),
         ),
       ),
       debugShowCheckedModeBanner: false,

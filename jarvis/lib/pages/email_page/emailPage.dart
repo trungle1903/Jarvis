@@ -25,7 +25,7 @@ class _EmailPageState extends State<EmailPage> {
     setState(() {
       messages.add(MessageTile(isAI: false, message: sendMessage));
       messages.add(
-        MessageTile(isAI: true, message: "OK", logoAI: _currentModelPathLogo),
+        MessageTile(isAI: true, message: "OK", aiLogo: _currentModelPathLogo),
       );
     });
   }

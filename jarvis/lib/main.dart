@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
 import 'package:jarvis/routes/routes.dart';
 
-
 void main() {
   runApp(const MyApp());
 }
@@ -19,14 +18,10 @@ class MyApp extends StatelessWidget {
         textTheme: TextTheme(
           displayLarge: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.black
+            color: Colors.black,
           ),
-          bodyMedium: const TextStyle(
-            color: Colors.black
-          ),
-          displaySmall: const TextStyle(
-            color: Colors.black
-          )
+          bodyMedium: const TextStyle(color: Colors.black),
+          displaySmall: const TextStyle(color: Colors.black),
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(

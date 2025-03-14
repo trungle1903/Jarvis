@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/pages/pricing_page/widgets/pricing_plan_card.dart';
-import 'package:jarvis/pages/pricing_page/widgets/feature_chip.dart';
+import 'package:jarvis/pages/pricing_page/pricing_plan_card.dart';
+import 'package:jarvis/pages/pricing_page/feature_chip.dart';
 
 class PricingPage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -16,7 +16,7 @@ class PricingPage extends StatelessWidget {
         elevation: 1,
         title: Row(
           children: [
-            Image.asset('assets/logos/jarvis.png', width: 24, height: 24,), 
+            Image.asset('assets/logos/jarvis.png', width: 24, height: 24), 
             SizedBox(width: 8),
             Text(
               "Jarvis",
@@ -52,6 +52,7 @@ class PricingPage extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: jvDeepBlue
                 ),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 12),
               Text(
@@ -63,8 +64,10 @@ class PricingPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                spacing: 16, 
+                runSpacing: 16,
+                alignment: WrapAlignment.center,
                 children: [
                   PricingPlanCard(
                     title: 'Basic',
@@ -79,7 +82,6 @@ class PricingPage extends StatelessWidget {
                     buttonTextColor: jvDeepBlue,
                     buttonBgColor: jvGrey,
                   ),
-                  SizedBox(width: 16),
                   PricingPlanCard(
                     title: 'Starter',
                     price: '1-month Free Trial',
@@ -93,7 +95,6 @@ class PricingPage extends StatelessWidget {
                     buttonTextColor: Colors.white,
                     buttonBgColor: jvBlue,
                   ),
-                  SizedBox(width: 16),
                   PricingPlanCard(
                     title: 'Pro Annually',
                     price: '1-month Free Trial',

@@ -38,7 +38,7 @@ class _BotsPageState extends State<BotsPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           children: [
             // Filters & Create Bot Button

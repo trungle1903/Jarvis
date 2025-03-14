@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/pages/bots/bots_page.dart';
 import 'package:jarvis/pages/email_page/emailPage.dart';
-import 'package:jarvis/pages/forgot_password_page/forgotPassword.dart';
+import 'package:jarvis/pages/auth/forgotPassword.dart';
 import 'package:jarvis/pages/group_page.dart';
-import 'package:jarvis/pages/sign_in_page/signIn.dart';
-import 'package:jarvis/pages/sign_up_page/signUp.dart';
+import 'package:jarvis/pages/auth/signIn.dart';
+import 'package:jarvis/pages/auth/signUp.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
 import 'package:jarvis/pages/pricing_page/pricingPage.dart';
 

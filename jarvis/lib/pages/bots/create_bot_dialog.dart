@@ -48,7 +48,6 @@ class _CreateBotDialogState extends State<CreateBotDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🏆 Title
                 Text(
                   "Create Your Own Bot",
                   style: Theme.of(context).dialogTheme.titleTextStyle,
@@ -74,7 +73,8 @@ class _CreateBotDialogState extends State<CreateBotDialog> {
                   ),
                 ),
                 SizedBox(height: 16),
-                Text("Knowledge base (Optional)", style: TextStyle(color: Colors.grey)),
+                Text("Knowledge Base (Optional)",
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
@@ -87,7 +87,7 @@ class _CreateBotDialogState extends State<CreateBotDialog> {
                     icon: Icon(Icons.add, color: jvDeepBlue),
                     label: Text("Add knowledge source", style: TextStyle(color:jvDeepBlue)),
                     style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 14), // More height
+                      padding: EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: jvDeepBlue),
                     ),
                   ),
@@ -110,14 +110,6 @@ class _CreateBotDialogState extends State<CreateBotDialog> {
                     text: 'Create',
                   ),
                 ],
-              ),
-            ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: IconButton(
-                icon: Icon(Icons.close, color: Colors.grey),
-                onPressed: () => Navigator.pop(context),
               ),
             ),
           ],

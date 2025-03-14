@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/components/dropdownAI.dart';
+import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/components/historyDrawer.dart';
 import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
+import 'package:jarvis/pages/bots/create_bot_dialog.dart';
 import 'package:jarvis/pages/prompt_library.dart';
 
 class ChatPage extends StatefulWidget {
@@ -71,6 +73,7 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
+        automaticallyImplyLeading: false,
         title: Text(
           widget.chatName ?? "Main Chat",
           style: const TextStyle(color: Colors.black),
@@ -81,9 +84,15 @@ class _ChatPageState extends State<ChatPage> {
             _scaffoldKey.currentState?.openDrawer();
           },
         ),
+        actions: [
+          IconButton(
+            onPressed: openHistoryDrawer,
+            icon: const Icon(Icons.history, color: Colors.black),
+          ),
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           children: [
             Expanded(
@@ -113,18 +122,20 @@ class _ChatPageState extends State<ChatPage> {
                         },
                       ),
                       const SizedBox(width: 10),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text("+ Create Bot"),
-                      ),
+                      GradientElevatedButton(
+                        borderRadius: 50,
+                        onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => CreateBotDialog(),
+                        );
+                      },
+                    text: '+  Create Bot',
+                  ),
                     ],
                   ),
                   Row(
                     children: [
-                      IconButton(
-                        onPressed: openHistoryDrawer,
-                        icon: const Icon(Icons.history, color: Colors.black),
-                      ),
                       IconButton(
                         onPressed: () {},
                         icon: const Icon(Icons.message, color: jvBlue),

@@ -6,12 +6,15 @@ class HistoryDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.5,
+      width: MediaQuery.of(context).size.width * 1,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppBar(
-            title: const Text("Chat History"),
+            title: const Text(
+              "Chat History",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             automaticallyImplyLeading: false,
             actions: [
               IconButton(

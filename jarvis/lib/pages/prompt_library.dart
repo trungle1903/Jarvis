@@ -50,34 +50,25 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
         selectedTab == 0 ? publicPrompts : myPrompts;
 
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.5,
+      width: MediaQuery.of(context).size.width * 1,
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Prompt Library",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.add, color: Colors.blue),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.black),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-              ],
+          AppBar(
+            title: const Text(
+              "Prompt Library",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
+            automaticallyImplyLeading: false,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.add, color: Colors.blue),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
           ),
 
           Padding(
@@ -104,7 +95,6 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
             ),
           ),
 
-          const SizedBox(height: 10),
           Expanded(
             child:
                 selectedPrompts.isEmpty

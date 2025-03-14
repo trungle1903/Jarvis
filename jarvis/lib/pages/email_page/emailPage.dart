@@ -4,7 +4,7 @@ import 'package:jarvis/components/dropdownAI.dart';
 import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/components/chatBar.dart';
 import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/pages/email_page/widgets/emailOptions.dart';
+import 'package:jarvis/pages/email_page/emailOptions.dart';
 
 class EmailPage extends StatefulWidget {
   const EmailPage({super.key});

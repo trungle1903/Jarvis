@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/pages/email_page/emailPage.dart';
-import 'package:jarvis/pages/sign_in_page/signIn.dart';
+import 'package:jarvis/pages/auth/signIn.dart';
 
 class SideBar extends StatelessWidget {
   final int selectedIndex; // Get selected index from parent

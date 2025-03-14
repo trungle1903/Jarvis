@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis/pages/bots_page.dart';
+import 'package:jarvis/pages/group_page.dart';
 
 class SideBar extends StatelessWidget {
-  const SideBar({super.key});
+  final int selectedIndex; // Get selected index from parent
+
+  const SideBar({super.key, required this.selectedIndex});
+
+  void navigateTo(BuildContext context, int index, String routeName) {
+    if (ModalRoute.of(context)?.settings.name != routeName) {
+      Navigator.pushReplacementNamed(context, routeName);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,25 +47,10 @@ class SideBar extends StatelessWidget {
           ),
 
           // Navigation Items
-          ListTile(
-            leading: const Icon(Icons.chat, color: Colors.blue),
-            title: const Text(
-              'Chat',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            tileColor: Colors.blue.withOpacity(0.1),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.smart_toy, color: Colors.grey),
-            title: const Text('BOT'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.group, color: Colors.grey),
-            title: const Text('Group'),
-            onTap: () {},
-          ),
+          buildNavItem(Icons.chat, "Chat", 0, context, "/chat"),
+          buildNavItem(Icons.smart_toy, "BOT", 1, context, "/bots"),
+          buildNavItem(Icons.group, "Group", 2, context, "/groups"),
+
           const Spacer(),
 
           // Desktop/Mobile App Section
@@ -92,6 +87,28 @@ class SideBar extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget buildNavItem(
+    IconData icon,
+    String title,
+    int index,
+    BuildContext context,
+    String routeName,
+  ) {
+    bool isSelected = selectedIndex == index;
+    return ListTile(
+      leading: Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? Colors.blue : Colors.black,
+        ),
+      ),
+      tileColor: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
+      onTap: () => navigateTo(context, index, routeName),
     );
   }
 }

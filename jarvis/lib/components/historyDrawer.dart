@@ -6,7 +6,7 @@ class HistoryDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.7,
+      width: MediaQuery.of(context).size.width * 0.5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/components/dropdownAI.dart';
 import 'package:jarvis/components/messageTile.dart';
-import 'package:jarvis/components/chatBar.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/email_page/emailOptions.dart';
 

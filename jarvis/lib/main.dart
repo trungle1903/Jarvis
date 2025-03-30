@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
+import 'package:jarvis/providers/auth_provider.dart';
 import 'package:jarvis/routes/routes.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  await dotenv.load(fileName: ".env");
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -19,14 +28,16 @@ class MyApp extends StatelessWidget {
         textTheme: TextTheme(
           displaySmall: const TextStyle(color: Colors.black),
           displayMedium: const TextStyle(color: Colors.black),
-          displayLarge: const TextStyle(fontWeight: FontWeight.bold,color: Colors.black),
+          displayLarge: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
           bodySmall: const TextStyle(color: Colors.black),
           bodyMedium: const TextStyle(color: Colors.black),
           bodyLarge: const TextStyle(color: Colors.black),
           titleSmall: const TextStyle(color: Colors.black),
           titleMedium: const TextStyle(color: Colors.black),
           titleLarge: const TextStyle(color: Colors.black),
-          
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
@@ -48,7 +59,11 @@ class MyApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           backgroundColor: Colors.white,
-          titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+          titleTextStyle: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
           contentTextStyle: TextStyle(fontSize: 16, color: Colors.black),
         ),
       ),

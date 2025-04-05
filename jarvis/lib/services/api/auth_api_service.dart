@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:jarvis/services/header_service.dart';
 import 'package:jarvis/services/storage.dart';
 
 import '../../models/user.dart';
@@ -8,60 +10,42 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthApiService {
   String baseUrl = dotenv.get('AUTH_API_BASE_URL');
-  String projectId = dotenv.get('PROJECT_ID');
-  String clientKey = dotenv.get('CLIENT_KEY');
-  Future<User> login(String email, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/v1/auth/password/sign-in'),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Stack-Access-Type': 'client',
-          'X-Stack-Project-Id': projectId,
-          'X-Stack-Publishable-Client-Key': clientKey,
-        },
-        body: jsonEncode({'email': email, 'password': password}),
-      );
+  final HeaderService _headerService;
+  final Dio _dio;
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return User(
-          id: data['user_id']?.toString() ?? '0',
-          name: '',
-          email: email,
-          token: data['access_token'],
-          refreshToken: data['refresh_token'],
-        );
-      } else {
-        throw Exception('Login failed: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Login error: $e');
-      rethrow;
-    }
+  AuthApiService(this._headerService, this._dio);
+  Future<User> login(String email, String password) async {
+    final response = await _dio.post(
+      '$baseUrl/api/v1/auth/password/sign-in',
+      data: {'email': email, 'password': password},
+      options: Options(headers: _headerService.baseHeaders),
+    );
+    return User.fromJson(response.data);
   }
 
-  Future<User> register(String name, String email, String password) async {
+  Future<User> register(String email, String password) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/v1/auth/sessions/current'),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Stack-Access-Type': 'client',
-          'X-Stack-Project-Id': projectId,
-          'X-Stack-Publishable-Client-Key': clientKey,
+      final response = await _dio.post(
+        '$baseUrl/api/v1/auth/password/sign-up',
+        data: {
+          'email': email,
+          'password': password,
+          'verification_callback_url': 'https://call-back-url.com/',
         },
-        body: jsonEncode({'name': name, 'email': email, 'password': password}),
+        options: Options(headers: _headerService.baseHeaders),
       );
-
-      if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        return User.fromJson(data['user']);
-      } else {
-        throw Exception('Registration failed: ${response.statusCode}');
+      if (response.statusCode != 200) {
+        final errorMessage = response.data['message'] ?? 'Invalid request';
+        throw AuthException(errorMessage);
       }
-    } catch (e) {
-      debugPrint('Registration error: $e');
+      return User.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode != 200) {
+        final errorData = e.response?.data;
+        throw AuthException(
+          errorData['message'] ?? 'Invalid email or password',
+        );
+      }
       rethrow;
     }
   }
@@ -75,19 +59,14 @@ class AuthApiService {
       final userId = await StorageService().readSecureData('user_id');
 
       if (accessToken != null && refreshToken != null) {
-        await http.post(
-          Uri.parse('$baseUrl/auth/logout'),
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Stack-Access-Type': 'client',
-            'X-Stack-Project-Id': projectId,
-            'X-Stack-Publishable-Client-Key': clientKey,
-          },
-          body: jsonEncode({
+        final response = await _dio.post(
+          '$baseUrl/auth/logout',
+          data: {
             'access_token': accessToken,
             'refresh_token': refreshToken,
             'user_id': userId,
-          }),
+          },
+          options: Options(headers: _headerService.baseHeaders),
         );
       }
       await StorageService().clearAll();
@@ -104,20 +83,14 @@ class AuthApiService {
         'refresh_token',
       );
       if (refreshToken == null) return null;
-
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/refresh'),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Stack-Access-Type': 'client',
-          'X-Stack-Project-Id': projectId,
-          'X-Stack-Publishable-Client-Key': clientKey,
-        },
-        body: jsonEncode({'refresh_token': refreshToken}),
+      final response = await _dio.post(
+        '$baseUrl/auth/refresh',
+        data: {'refresh_token': refreshToken},
+        options: Options(headers: _headerService.baseHeaders),
       );
 
       if (response.statusCode == 200) {
-        final newToken = jsonDecode(response.body)['access_token'];
+        final newToken = jsonDecode(response.data)['access_token'];
         await StorageService().writeSecureData('access_token', newToken);
         return newToken;
       }
@@ -126,4 +99,12 @@ class AuthApiService {
     }
     return null;
   }
+}
+
+class AuthException implements Exception {
+  final String message;
+  AuthException(this.message);
+
+  @override
+  String toString() => message;
 }

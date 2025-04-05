@@ -1,15 +1,25 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:jarvis/services/header_service.dart';
 import 'package:jarvis/services/storage.dart';
 import '../models/user.dart';
 import '../services/api/auth_api_service.dart';
 
 class AuthProvider with ChangeNotifier {
-  final AuthApiService _apiService = AuthApiService();
-  final StorageService _storageService = StorageService();
+  final StorageService _storageService;
+  final HeaderService _headerService;
+  final AuthApiService _apiService;
   User? _user;
   bool _isLoading = false;
   String? _error;
 
+  AuthProvider({
+    required StorageService storageService,
+    required HeaderService headerService,
+    required Dio dio,
+  }) : _storageService = storageService,
+       _headerService = headerService,
+       _apiService = AuthApiService(headerService, dio);
   User? get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -32,13 +42,13 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> register(String name, String email, String password) async {
+  Future<void> register(String email, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _user = await _apiService.register(name, email, password);
+      _user = await _apiService.register(email, password);
       _error = null;
     } catch (e) {
       _user = null;

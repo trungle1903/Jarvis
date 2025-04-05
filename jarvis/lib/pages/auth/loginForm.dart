@@ -17,12 +17,12 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscureText = true;
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -106,8 +106,8 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 style: TextStyle(color: Colors.black),
                 cursorColor: Colors.black,
-                controller: _usernameController,
-                keyboardType: TextInputType.text,
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 validator:
                     (value) =>
                         value!.isEmpty ? 'Please enter your email' : null,
@@ -170,46 +170,61 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
               SizedBox(height: 20),
-              authProvider.isLoading
-                  ? CircularProgressIndicator()
-                  : TextButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        try {
-                          await authProvider.login(
-                            _usernameController.text,
-                            _passwordController.text,
-                          );
+              TextButton(
+                onPressed:
+                    authProvider.isLoading
+                        ? null
+                        : () async {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              await authProvider.login(
+                                _emailController.text,
+                                _passwordController.text,
+                              );
 
-                          if (authProvider.isAuthenticated) {
-                            Navigator.pushNamedAndRemoveUntil(
-                              context,
-                              '/chat',
-                              (Route<dynamic> route) => false,
-                            );
+                              if (authProvider.isAuthenticated) {
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/chat',
+                                  (Route<dynamic> route) => false,
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Login failed: ${e.toString()}',
+                                  ),
+                                ),
+                              );
+                            }
                           }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Login failed: ${e.toString()}'),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      foregroundColor: Colors.white,
-                      backgroundColor: jvDeepBlue,
-                      minimumSize: Size(double.infinity, 50),
-                    ),
-                    child: Text(
-                      'Sign In',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                        },
+                style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  foregroundColor: Colors.white,
+                  backgroundColor: jvDeepBlue,
+                  minimumSize: Size(double.infinity, 50),
+                ),
+                child:
+                    authProvider.isLoading
+                        ? SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                        : Text(
+                          'Sign In',
+                          style: TextStyle(color: Colors.white),
+                        ),
+              ),
             ],
           ),
         ),

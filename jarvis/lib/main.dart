@@ -1,15 +1,30 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
 import 'package:jarvis/providers/auth_provider.dart';
 import 'package:jarvis/routes/routes.dart';
+import 'package:jarvis/services/header_service.dart';
+import 'package:jarvis/services/storage.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
+  final dio = Dio();
+  final storageService = StorageService();
+  final headerService = await HeaderService.initialize();
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
+      providers: [
+        ChangeNotifierProvider(
+          create:
+              (_) => AuthProvider(
+                storageService: storageService,
+                headerService: headerService,
+                dio: dio,
+              ),
+        ),
+      ],
       child: MyApp(),
     ),
   );

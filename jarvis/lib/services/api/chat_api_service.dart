@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jarvis/models/chat_response.dart';
 import 'package:jarvis/services/header_service.dart';
@@ -17,31 +18,65 @@ class ChatApiService {
     required String message,
     required String conversationId,
     required String assistantId,
+    required String assistantName,
     List<dynamic> files = const [],
   }) async {
     try {
       final accessToken = await StorageService().readSecureData('access_token');
-      final response = await _dio.post(
-        '$baseUrl/chat',
-        data: {
-          'content': message,
-          'files': files,
-          'assistant': {'id': assistantId},
-          'metadata': {
-            'conversation': {'id': conversationId},
+      if (accessToken == null) {
+        throw Exception('Access token is missing.');
+      }
+      print('[ChatAPI] Access Token: $accessToken');
+      print('[ChatAPI] Sending Payload:');
+      final payload = {
+        'content': message,
+        'files': files,
+        'metadata': {
+          'conversation': {
+            'messages': [
+              {
+                'role': 'user',
+                'content': message,
+                'files': files,
+                'assistant': {
+                  'model': 'dify',
+                  'name': assistantName,
+                  'id': assistantId,
+                },
+              },
+              {
+                "role": "model",
+                "content": "Hello! How can I assist you today?",
+                "assistant": {
+                  "model": "dify",
+                  "name": assistantName,
+                  "id": assistantId,
+                },
+              },
+            ],
           },
         },
+        'assistant': {
+          'model': 'dify',
+          'name': assistantName,
+          'id': assistantId,
+        },
+      };
+      print(payload);
+      final response = await _dio.post(
+        '$baseUrl/api/v1/ai-chat/messages',
+        data: payload,
         options: Options(
           headers: {
-            'Authorization': 'Bearer {{$accessToken}}',
+            'Authorization': 'Bearer $accessToken',
             'Content-Type': 'application/json',
           },
         ),
       );
-
       return ChatResponse.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
+        debugPrint(e.response?.data);
         throw Exception('Invalid request: ${e.response?.data['message']}');
       }
       rethrow;

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
 import 'package:jarvis/providers/auth_provider.dart';
+import 'package:jarvis/providers/chat_provider.dart';
 import 'package:jarvis/routes/routes.dart';
+import 'package:jarvis/services/api/chat_api_service.dart';
 import 'package:jarvis/services/header_service.dart';
 import 'package:jarvis/services/storage.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +15,7 @@ void main() async {
   final dio = Dio();
   final storageService = StorageService();
   final headerService = await HeaderService.initialize();
+  final chatApiService = ChatApiService(dio: dio, headerService: headerService);
   runApp(
     MultiProvider(
       providers: [
@@ -24,6 +27,7 @@ void main() async {
                 dio: dio,
               ),
         ),
+        ChangeNotifierProvider(create: (_) => ChatProvider(chatApiService)),
       ],
       child: MyApp(),
     ),

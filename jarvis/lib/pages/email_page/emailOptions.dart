@@ -12,37 +12,42 @@ class EmailOptions extends StatelessWidget {
     {'icon': Icons.refresh, 'label': 'Follow up'},
   ];
 
-  EmailOptions({super.key});
+  EmailOptions({
+    super.key,
+    required Null Function(dynamic option) onOptionSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: emailOptions.sublist(0, 4).map((option) {
-                  return EmailOptionTile(
-                    icon: option['icon'],
-                    label: option['label'],
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: emailOptions.sublist(4, 7).map((option) {
-                  return EmailOptionTile(
-                    icon: option['icon'],
-                    label: option['label'],
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
+      scrollDirection: Axis.horizontal,
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children:
+                  emailOptions.sublist(0, 4).map((option) {
+                    return EmailOptionTile(
+                      icon: option['icon'],
+                      label: option['label'],
+                    );
+                  }).toList(),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              children:
+                  emailOptions.sublist(4, 7).map((option) {
+                    return EmailOptionTile(
+                      icon: option['icon'],
+                      label: option['label'],
+                    );
+                  }).toList(),
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 }

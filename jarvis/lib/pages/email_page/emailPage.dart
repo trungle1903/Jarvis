@@ -3,6 +3,7 @@ import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/components/dropdownAI.dart';
 import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/constants/colors.dart';
+import 'package:jarvis/models/assistant.dart';
 import 'package:jarvis/pages/email_page/emailOptions.dart';
 
 class EmailPage extends StatefulWidget {
@@ -13,26 +14,52 @@ class EmailPage extends StatefulWidget {
 }
 
 class _EmailPageState extends State<EmailPage> {
-  List<MessageTile> messages = [];
+  final List<MessageTile> _messages = [];
   final TextEditingController _messageController = TextEditingController();
-  final List<Map<String, String>> _aiModels = [
-    {'name': 'Gemini 1.5 Flash', 'logo': 'assets/logos/gemini.png'},
-    {'name': 'Chat GPT 4o', 'logo': 'assets/logos/gpt.png'},
+  final List<Assistant> _aiModels = [
+    Assistant(id: 'gemini', name: 'Gemini 1.5 Flash', model: 'gemini'),
+    Assistant(id: 'gpt-4', name: 'Chat GPT 4o', model: 'gpt-4'),
   ];
-  String _currentModelPathLogo = "assets/logos/gpt.png";
-  String _currentModelName = "Chat GPT 4o";
+  late Assistant _currentAssistant;
 
-  void onSendMessage(String sendMessage) {
+  @override
+  void initState() {
+    super.initState();
+    _currentAssistant = _aiModels[1]; // Default to GPT
+  }
+
+  void _sendMessage(String message) {
+    if (message.trim().isEmpty) return;
+
     setState(() {
-      messages.add(MessageTile(isAI: false, message: sendMessage));
-      messages.add(
+      _messages.add(MessageTile(isAI: false, message: message));
+      _messages.add(
         MessageTile(
           isAI: true,
-          message: "OK",
-          aiLogo: _currentModelPathLogo,
-          aiName: _currentModelName,
+          message:
+              "Here's your generated email...", // Replace with actual API response
+          aiLogo: _getAssistantLogo(_currentAssistant.model),
+          aiName: _currentAssistant.name,
         ),
       );
+      _messageController.clear();
+    });
+  }
+
+  String _getAssistantLogo(String model) {
+    switch (model) {
+      case 'gemini':
+        return 'assets/logos/gemini.png';
+      case 'gpt-4':
+        return 'assets/logos/gpt.png';
+      default:
+        return 'assets/logos/default_ai.png';
+    }
+  }
+
+  void _handleModelChange(Assistant newAssistant) {
+    setState(() {
+      _currentAssistant = newAssistant;
     });
   }
 
@@ -53,62 +80,73 @@ class _EmailPageState extends State<EmailPage> {
         children: [
           Expanded(
             child:
-                messages.isEmpty
-                    ? const Center(child: Text("Start generating emails..."))
+                _messages.isEmpty
+                    ? const Center(
+                      child: Text(
+                        "Start generating emails...",
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    )
                     : ListView.builder(
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) {
-                        return messages[index];
-                      },
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) => _messages[index],
                     ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: Row(
-              children: [
-                Expanded(child: EmailOptions()),
-                const SizedBox(width: 10),
-                DropdownAI(
-                  aiModels: _aiModels,
-                  onChange: (nameModel) {
-                    setState(() {
-                      _currentModelName = _currentModelName;
-                      _currentModelPathLogo =
-                          _aiModels.firstWhere(
-                            (element) => element['name'] == nameModel,
-                          )['logo']!;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
+          _buildInputSection(),
+        ],
+      ),
+    );
+  }
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: TextField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                hintText: "Ask me anything, press '/' for prompts...",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 10,
-                  horizontal: 15,
-                ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.send, color: jvBlue),
-                  onPressed: () {
-                    onSendMessage(_messageController.text);
+  Widget _buildInputSection() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: Row(
+            children: [
+              Expanded(
+                child: EmailOptions(
+                  onOptionSelected: (option) {
+                    _sendMessage("Generate email about $option");
                   },
                 ),
               ),
-            ),
+              const SizedBox(width: 10),
+              DropdownAI(
+                assistants: _aiModels,
+                currentAssistant: _currentAssistant,
+                onChange: _handleModelChange,
+                showText: false,
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-        ],
-      ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: TextField(
+            controller: _messageController,
+            decoration: InputDecoration(
+              hintText: "Describe the email you want to generate...",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 12,
+                horizontal: 16,
+              ),
+              prefixIcon: const Icon(Icons.email, color: Colors.grey),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.send, color: jvBlue),
+                onPressed: () => _sendMessage(_messageController.text),
+              ),
+            ),
+            onSubmitted: _sendMessage,
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
     );
   }
 }

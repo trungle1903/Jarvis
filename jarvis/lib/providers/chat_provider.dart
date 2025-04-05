@@ -19,6 +19,7 @@ class ChatProvider with ChangeNotifier {
   Future<void> sendMessage({
     required String message,
     required String assistantId,
+    required String assistantName,
     String? conversationId,
     List<dynamic> files = const [],
   }) async {
@@ -45,6 +46,7 @@ class ChatProvider with ChangeNotifier {
         message: message,
         conversationId: conversationId ?? 'new-conversation',
         assistantId: assistantId,
+        assistantName: assistantName,
         files: files,
       );
       _messages = response.metadata.messages;

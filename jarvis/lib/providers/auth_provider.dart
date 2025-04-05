@@ -32,6 +32,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       _user = await _apiService.login(email, password);
+      await _storageService.saveAuthData(_user!);
       _error = null;
     } catch (e) {
       _user = null;
@@ -49,6 +50,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       _user = await _apiService.register(email, password);
+      await _storageService.saveAuthData(_user!);
       _error = null;
     } catch (e) {
       _user = null;

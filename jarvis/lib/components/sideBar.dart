@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/auth/signIn.dart';
+import 'package:jarvis/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class SideBar extends StatelessWidget {
   final int selectedIndex; // Get selected index from parent
@@ -54,8 +56,7 @@ class SideBar extends StatelessWidget {
           const Spacer(),
           Tooltip(
             message: 'Desktop/Mobile App',
-            child: 
-            ListTile(
+            child: ListTile(
               leading: const Icon(Icons.devices, color: Colors.black54),
               title: const Text(
                 'Desktop/Mobile App',
@@ -70,49 +71,75 @@ class SideBar extends StatelessWidget {
             children: [
               Tooltip(
                 message: 'User Center',
-                child:
-                  IconButton(
-                    icon: const Icon(Icons.person, color: Colors.grey),
-                    onPressed: () {},
-                  ),
+                child: IconButton(
+                  icon: const Icon(Icons.person, color: Colors.grey),
+                  onPressed: () {},
                 ),
+              ),
               Tooltip(
                 message: 'Feedback',
-                child: 
-                  IconButton(
-                    icon: const Icon(Icons.attach_email, color: Colors.grey),
-                    onPressed: () {},
-                  ),
+                child: IconButton(
+                  icon: const Icon(Icons.attach_email, color: Colors.grey),
+                  onPressed: () {},
+                ),
               ),
               Tooltip(
                 message: 'Help Center',
-                child: 
-                  IconButton(
-                    icon: const Icon(Icons.help_outline, color: Colors.grey),
-                    onPressed: () {},
-                  ),
+                child: IconButton(
+                  icon: const Icon(Icons.help_outline, color: Colors.grey),
+                  onPressed: () {},
+                ),
               ),
               Tooltip(
                 message: 'Give us a 5-star',
-                child: 
-                  IconButton(
-                    icon: const Icon(Icons.star_border, color: Colors.grey),
-                    onPressed: () {},
-                  ),
+                child: IconButton(
+                  icon: const Icon(Icons.star_border, color: Colors.grey),
+                  onPressed: () {},
+                ),
               ),
               Tooltip(
                 message: 'Log out',
-                child: 
-                  IconButton(
-                    icon: const Icon(Icons.logout, color: Colors.red),
-                    onPressed: () {
-                      Navigator.push(
+                child: IconButton(
+                  icon: const Icon(Icons.logout, color: Colors.red),
+                  onPressed: () async {
+                    final confirmed = await showDialog(
+                      context: context,
+                      builder:
+                          (context) => AlertDialog(
+                            title: Text('Confirm Logout'),
+                            content: Text('Are you sure you want to logout?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: Text(
+                                  'Logout',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                    );
+
+                    if (confirmed == true) {
+                      final authProvider = Provider.of<AuthProvider>(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignInApp()),
+                        listen: false,
                       );
-                    },
-                  ),
-              )
+                      await authProvider.logout();
+
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/signIn',
+                        (Route<dynamic> route) => false,
+                      );
+                    }
+                  },
+                ),
+              ),
             ],
           ),
         ],

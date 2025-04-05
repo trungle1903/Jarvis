@@ -182,11 +182,10 @@ class _LoginFormState extends State<LoginForm> {
                           );
 
                           if (authProvider.isAuthenticated) {
-                            Navigator.pushReplacement(
+                            Navigator.pushNamedAndRemoveUntil(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatPage(),
-                              ),
+                              '/chat',
+                              (Route<dynamic> route) => false,
                             );
                           }
                         } catch (e) {

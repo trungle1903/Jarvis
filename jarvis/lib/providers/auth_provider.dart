@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:jarvis/services/storage.dart';
 import '../models/user.dart';
 import '../services/api/auth_api_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthApiService _apiService = AuthApiService();
+  final StorageService _storageService = StorageService();
   User? _user;
   bool _isLoading = false;
   String? _error;
@@ -48,8 +50,20 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _apiService.logout();
-    _user = null;
+    _isLoading = true;
     notifyListeners();
+
+    try {
+      await _apiService.logout();
+      _user = null;
+      _error = null;
+      await _storageService.clearAuthData();
+    } catch (e) {
+      debugPrint('Logout error: $e');
+      _error = 'Logout failed';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

@@ -4,21 +4,28 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
 import 'package:jarvis/providers/auth_provider.dart';
 import 'package:jarvis/providers/chat_provider.dart';
+import 'package:jarvis/providers/prompt_provider.dart';
 import 'package:jarvis/routes/routes.dart';
 import 'package:jarvis/services/api/chat_api_service.dart';
+import 'package:jarvis/services/api/prompt_api_service.dart';
 import 'package:jarvis/services/header_service.dart';
 import 'package:jarvis/services/storage.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   final dio = Dio();
   final storageService = StorageService();
   final headerService = await HeaderService.initialize();
   final chatApiService = ChatApiService(dio: dio, headerService: headerService);
+  final promptApiService = PromptApiService(dio: dio, headerService: headerService);
   runApp(
     MultiProvider(
       providers: [
+        Provider<PromptApiService>(
+          create: (_) => PromptApiService(dio: dio, headerService: headerService),
+        ),
         ChangeNotifierProvider(
           create:
               (_) => AuthProvider(
@@ -27,7 +34,22 @@ void main() async {
                 dio: dio,
               ),
         ),
-        ChangeNotifierProvider(create: (_) => ChatProvider(chatApiService)),
+        ChangeNotifierProvider(
+          create: (context) => ChatProvider(
+            ChatApiService(
+              dio: dio,
+              headerService: headerService,
+            ),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => PromptProvider(
+            PromptApiService(
+              dio: dio,
+              headerService: headerService,
+            ),
+          ),
+        ),
       ],
       child: MyApp(),
     ),
@@ -89,7 +111,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: Routes.routes,
       initialRoute: Routes.signIn,
-      home: ChatPage(chatName: "Chat"),
     );
   }
 }

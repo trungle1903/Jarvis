@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/pages/promp/usePromptBottomSheet.dart';
+import 'package:jarvis/models/prompt.dart';
+import 'package:jarvis/pages/prompt/usePromptBottomSheet.dart';
 
 class PromptListWidget extends StatelessWidget {
-  final List<Map<String, dynamic>> prompts;
-  final VoidCallback onPromptSelected;
+  final List<Prompt> prompts;
+  final Function(Prompt) onPromptSelected;
+  final Function (String) onFavoriteToggled;
 
   const PromptListWidget({
     required this.prompts,
     required this.onPromptSelected,
+    required this.onFavoriteToggled
   });
 
   @override
@@ -16,21 +19,22 @@ class PromptListWidget extends StatelessWidget {
     return ListView.builder(
       itemCount: prompts.length,
       itemBuilder: (context, index) {
+        final prompt = prompts[index];
         return Card(
           child: ListTile(
           title: Text(
-            prompts[index]["title"]!,
+            prompt.title,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          subtitle: Text(prompts[index]["description"]!),
+          subtitle: Text(prompt.description),
           trailing:
            Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 icon: Icon(
-                  prompts[index]["isFavorite"] == true ? Icons.star : Icons.star_outline,
-                  color: prompts[index]["isFavorite"] == true ? Colors.amber : Colors.grey,
+                  prompt.isFavorite == true ? Icons.star : Icons.star_outline,
+                  color: prompt.isFavorite == true ? Colors.amber : Colors.grey,
                 ),
                 onPressed: () {},
               ),
@@ -47,11 +51,11 @@ class PromptListWidget extends StatelessWidget {
                   isScrollControlled: true,
                   builder: (context) {
                     return UsePromptBottomSheet(
-                      title: prompts[index]["title"]!, 
-                      prompt: prompts[index]["prompt"]!,
-                      author: prompts[index]["author"]!, 
-                      description: prompts[index]["description"]!, 
-                      category: prompts[index]['category']!,
+                      title: prompt.title, 
+                      prompt: prompt.content,
+                      author: prompt.userName, 
+                      description: prompt.description, 
+                      category: prompt.category,
                     );
                   },
                 );

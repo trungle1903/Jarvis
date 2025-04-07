@@ -7,7 +7,7 @@ import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/models/assistant.dart';
 import 'package:jarvis/pages/bots/create_bot_dialog.dart';
-import 'package:jarvis/pages/promp/prompt_library.dart';
+import 'package:jarvis/pages/prompt/prompt_library.dart';
 import 'package:jarvis/providers/chat_provider.dart';
 import 'package:provider/provider.dart';
 

@@ -208,7 +208,10 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
                     },
                     onFavoriteToggled: (promptId) {
                       _toggleFavorite(promptId);
-                    }
+                    },
+                    isMyPromptTab: selectedTab == 1,
+                    apiService: promptProvider.api,
+                    onReload: _loadPrompts,
                   ),
           ),
         ],

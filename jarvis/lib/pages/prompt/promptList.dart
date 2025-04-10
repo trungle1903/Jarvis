@@ -29,6 +29,7 @@ class _PromptListWidgetState extends State<PromptListWidget> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      padding: const EdgeInsets.all(8),
       itemCount: widget.prompts.length,
       itemBuilder: (context, index) {
         final prompt = widget.prompts[index];

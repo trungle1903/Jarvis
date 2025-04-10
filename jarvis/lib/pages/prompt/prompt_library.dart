@@ -57,11 +57,15 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
     setState(() => isLoading = true);
     try {
       final promptProvider = Provider.of<PromptProvider>(context, listen: false);
-      await promptProvider.loadPrompts(
-        query: searchQuery,
-        category: categoryMap[selectedCategoryTab],
-        isFavorite: showFavoritesOnly ? true : null,
-      );
+      if (selectedTab == 0) {
+        await promptProvider.loadPrompts(
+          query: searchQuery,
+          category: categoryMap[selectedCategoryTab],
+          isFavorite: showFavoritesOnly ? true : null,
+        );
+      } else {
+        await promptProvider.loadPrompts(query: searchQuery);
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading prompts: ${e.toString()}')),

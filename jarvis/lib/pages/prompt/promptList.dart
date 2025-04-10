@@ -7,11 +7,13 @@ class PromptListWidget extends StatelessWidget {
   final List<Prompt> prompts;
   final Function(Prompt) onPromptSelected;
   final Function (String) onFavoriteToggled;
+  final bool isMyPromptTab;
 
   const PromptListWidget({
     required this.prompts,
     required this.onPromptSelected,
-    required this.onFavoriteToggled
+    required this.onFavoriteToggled,
+    required this.isMyPromptTab
   });
 
   @override
@@ -31,18 +33,29 @@ class PromptListWidget extends StatelessWidget {
            Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: Icon(
-                  prompt.isFavorite == true ? Icons.star : Icons.star_outline,
-                  color: prompt.isFavorite == true ? Colors.amber : Colors.grey,
+              if (isMyPromptTab) ...[
+                IconButton(
+                  onPressed: (){},
+                  icon: Icon(Icons.edit, color: Colors.grey,),
                 ),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: Icon(Icons.info_outline, color: Colors.grey,
+                IconButton(
+                  onPressed: (){}, 
+                  icon: Icon(Icons.delete, color: Colors.grey,)
+                )
+              ] else ...[
+                IconButton(
+                  icon: Icon(
+                    prompt.isFavorite == true ? Icons.star : Icons.star_outline,
+                    color: prompt.isFavorite == true ? Colors.amber : Colors.grey,
+                  ),
+                  onPressed: () {},
                 ),
-                onPressed: () {},
-              ),
+                IconButton(
+                  icon: Icon(Icons.info_outline, color: Colors.grey,
+                  ),
+                  onPressed: () {},
+                ),
+              ],
               IconButton(
                 icon: Icon(Icons.arrow_forward, color: jvBlue),
                 onPressed: () {

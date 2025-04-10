@@ -152,6 +152,7 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
                   ),
                 ),
                 const SizedBox(width: 10),
+                if (selectedTab == 0)
                 IconButton(
                   icon: Icon(
                     showFavoritesOnly ? Icons.star : Icons.star_border,
@@ -169,6 +170,7 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
           ),
 
           // Category Tabs
+          if (selectedTab == 0)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
             child: SingleChildScrollView(

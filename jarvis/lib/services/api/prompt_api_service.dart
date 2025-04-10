@@ -61,10 +61,6 @@ class PromptApiService {
     }
   }
 
-  Future<void> toggleFavorite(String promptId) async {
-    await _dio.post('$baseUrl/prompts/$promptId/favorite');
-  }
-
   Future<Prompt> createPrompt(Map<String, dynamic> data) async {
     try {
       final accessToken = await StorageService().readSecureData('access_token');
@@ -106,6 +102,7 @@ class PromptApiService {
         ),
     );
   }
+  
   Future<Prompt> editPrompt({
     required String id,
     required String title,
@@ -135,5 +132,39 @@ class PromptApiService {
     );
 
     return Prompt.fromJson(response.data);
+  }
+
+  Future<void> favoritePrompt(String promptId) async {
+    final accessToken = await StorageService().readSecureData('access_token');
+    final response = await _dio.post(
+      '$baseUrl/api/v1/prompts/$promptId/favorite',
+        options: Options(
+          headers: {
+            'x-jarvis-guid': guid,
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+    );
+    if (response.statusCode != 201) {
+      throw Exception('Failed to favorite prompt');
+    }
+  }
+
+  Future<void> unfavoritePrompt(String promptId) async {
+    final accessToken = await StorageService().readSecureData('access_token');
+
+    final response = await _dio.delete(
+      '$baseUrl/api/v1/prompts/$promptId/favorite',
+      options: Options(
+        headers: {
+          'x-jarvis-guid': guid,
+          'Authorization': 'Bearer $accessToken',
+        },
+      ),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to remove prompt from favorites');
+    }
   }
 }

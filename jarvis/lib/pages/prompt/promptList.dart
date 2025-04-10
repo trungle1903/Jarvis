@@ -5,7 +5,7 @@ import 'package:jarvis/pages/prompt/editPromptDialog.dart';
 import 'package:jarvis/pages/prompt/usePromptBottomSheet.dart';
 import 'package:jarvis/services/api/prompt_api_service.dart';
 
-class PromptListWidget extends StatelessWidget {
+class PromptListWidget extends StatefulWidget {
   final List<Prompt> prompts;
   final Function(Prompt) onPromptSelected;
   final Function (String) onFavoriteToggled;
@@ -21,13 +21,17 @@ class PromptListWidget extends StatelessWidget {
     required this.apiService, 
     required this.onReload
   });
+  @override
+  State<PromptListWidget> createState() => _PromptListWidgetState();
+}
 
+class _PromptListWidgetState extends State<PromptListWidget> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: prompts.length,
+      itemCount: widget.prompts.length,
       itemBuilder: (context, index) {
-        final prompt = prompts[index];
+        final prompt = widget.prompts[index];
         return Card(
           child: ListTile(
           title: Text(
@@ -39,15 +43,15 @@ class PromptListWidget extends StatelessWidget {
            Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (isMyPromptTab) ...[
+              if (widget.isMyPromptTab) ...[
                 IconButton(
                   onPressed: (){
                     showDialog(
                       context: context, 
                       builder: (_) => EditPromptDialog(
                         prompt: prompt, 
-                        apiService: apiService, 
-                        onUpdated: onReload)
+                        apiService: widget.apiService, 
+                        onUpdated: widget.onReload)
                     );
                   },
                   icon: Icon(Icons.edit, color: Colors.grey,),
@@ -66,8 +70,8 @@ class PromptListWidget extends StatelessWidget {
                       )
                     );
                     if (confirm == true) {
-                      await apiService.deletePrompt(prompt.id);
-                      onReload();
+                      await widget.apiService.deletePrompt(prompt.id);
+                      widget.onReload();
                     }
                   }, 
                   icon: Icon(Icons.delete, color: Colors.grey,)
@@ -78,7 +82,22 @@ class PromptListWidget extends StatelessWidget {
                     prompt.isFavorite == true ? Icons.star : Icons.star_outline,
                     color: prompt.isFavorite == true ? Colors.amber : Colors.grey,
                   ),
-                  onPressed: () {},
+                  onPressed: () async {
+                    try {
+                      if (prompt.isFavorite == true) {
+                        await widget.apiService.unfavoritePrompt(prompt.id);
+                      } else {
+                        await widget.apiService.favoritePrompt(prompt.id);
+                      }
+                      setState(() {
+                        prompt.isFavorite = !prompt.isFavorite;
+                      });
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to toggle Favoritr'))
+                      );
+                    }
+                  },
                 ),
                 IconButton(
                   icon: Icon(Icons.info_outline, color: Colors.grey,

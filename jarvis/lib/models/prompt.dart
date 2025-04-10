@@ -5,7 +5,7 @@ class Prompt {
   final String content;
   final String description;
   final bool isPublic;
-  final bool isFavorite;
+  bool isFavorite;
   final String language;
   final DateTime createdAt;
   final DateTime updatedAt;

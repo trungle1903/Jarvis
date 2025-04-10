@@ -193,7 +193,7 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
               ),
             ),
           ),
-
+          SizedBox(height: 10),
           Expanded(
             child: isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -206,9 +206,7 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
                     onPromptSelected: (prompt) {
                       Navigator.pop(context, prompt);
                     },
-                    onFavoriteToggled: (promptId) {
-                      _toggleFavorite(promptId);
-                    },
+                    onFavoriteToggled: (promptId) {},
                     isMyPromptTab: selectedTab == 1,
                     apiService: promptProvider.api,
                     onReload: _loadPrompts,
@@ -235,17 +233,6 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
       ),
     );
   }
-
- Future<void> _toggleFavorite(String promptId) async {
-  try {
-    final promptProvider = Provider.of<PromptProvider>(context, listen: false);
-    final api = promptProvider.api;
-    await api.toggleFavorite(promptId);
-    _loadPrompts();
-  } catch (e) {
-    throw Exception(e);
-  }
- }
 
  void _showCreatePromptDialog() {
   showDialog(

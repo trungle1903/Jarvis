@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/models/prompt.dart';
+import 'package:jarvis/pages/prompt/editPromptDialog.dart';
 import 'package:jarvis/pages/prompt/usePromptBottomSheet.dart';
 import 'package:jarvis/services/api/prompt_api_service.dart';
 
@@ -40,7 +41,15 @@ class PromptListWidget extends StatelessWidget {
             children: [
               if (isMyPromptTab) ...[
                 IconButton(
-                  onPressed: (){},
+                  onPressed: (){
+                    showDialog(
+                      context: context, 
+                      builder: (_) => EditPromptDialog(
+                        prompt: prompt, 
+                        apiService: apiService, 
+                        onUpdated: onReload)
+                    );
+                  },
                   icon: Icon(Icons.edit, color: Colors.grey,),
                 ),
                 IconButton(

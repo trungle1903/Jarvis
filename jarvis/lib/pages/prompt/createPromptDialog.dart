@@ -20,7 +20,7 @@ class _CreatePromptDialogState extends State<CreatePromptDialog> {
   final _descriptionController = TextEditingController();
   String _selectedCategory = 'other';
   String _selectedLanguage = 'English';
-  bool _isPublic = true;
+  final bool _isPublic = true;
   bool _isLoading = false;
   final List<String> categories = [
     'business',
@@ -143,16 +143,6 @@ class _CreatePromptDialogState extends State<CreatePromptDialog> {
                           decoration: InputDecoration(border: OutlineInputBorder()),
                           validator: (value) => value == null ? 'Please select a language' : null,
                         ), 
-
-                        SizedBox(height: 16),
-
-                        Row(
-                          children: [
-                          Text("Make Public", style: TextStyle(fontWeight: FontWeight.bold),),
-                          Spacer(),
-                          Switch(value: _isPublic, onChanged: (value) => setState(() => _isPublic = value)),
-                        ],
-                        ),
                         
                         SizedBox(height: 20,),
                       ],

@@ -106,4 +106,34 @@ class PromptApiService {
         ),
     );
   }
+  Future<Prompt> editPrompt({
+    required String id,
+    required String title,
+    required String description,
+    required String content,
+    required String category,
+    required bool isPublic,
+    required String language,
+  }) async {
+    final accessToken = await StorageService().readSecureData('access_token');
+    final response = await _dio.patch(
+      '$baseUrl/api/v1/prompts/$id',
+      data: {
+        'title': title,
+        'description': description,
+        'content': content,
+        'category': category,
+        'isPublic': isPublic,
+        'language': language
+      },
+      options: Options(
+        headers: {
+          'x-jarvis-guid': guid,
+          'Authorization': 'Bearer $accessToken',
+        },
+      ),
+    );
+
+    return Prompt.fromJson(response.data);
+  }
 }

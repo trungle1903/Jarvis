@@ -10,8 +10,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthApiService {
   String baseUrl = dotenv.get('AUTH_API_BASE_URL');
+  String appBaseURL = dotenv.get('APP_API_BASE_URL');
   final HeaderService _headerService;
   final Dio _dio;
+  String guid = dotenv.get('X_JARVIS_GUID');
 
   AuthApiService(this._headerService, this._dio);
   Future<User> login(String email, String password) async {
@@ -20,7 +22,12 @@ class AuthApiService {
       data: {'email': email, 'password': password},
       options: Options(headers: _headerService.baseHeaders),
     );
-    return User.fromJson(response.data);
+    final loginData = response.data;
+    final token = loginData['access_token'];
+    final refreshToken = loginData['refresh_token'];
+
+    final user = await fetchUserProfile(token, refreshToken);
+    return user;
   }
 
   Future<User> register(String email, String password) async {
@@ -98,6 +105,35 @@ class AuthApiService {
       debugPrint('Token refresh failed: $e');
     }
     return null;
+  }
+  Future<User> fetchUserProfile(String accessToken, String refreshToken) async {
+    try {
+      final response = await _dio.get(
+        '$appBaseURL/api/v1/auth/me',
+        options: Options(
+          headers: {
+            'x-jarvis-guid': guid,
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+
+      final data = response.data;
+
+      return User(
+        id: data['id'].toString(),
+        name: data['username'],
+        email: data['email'],
+        token: accessToken,
+        refreshToken: refreshToken,
+      );
+    } on DioException catch (e) {
+      debugPrint("Dio error: ${e.response?.statusCode} - ${e.response?.data}");
+      throw Exception('Failed to fetch user profile: ${e.message}');
+    } catch (e) {
+      debugPrint("Unexpected error: $e");
+      throw Exception('Failed to fetch user profile: $e');
+    }
   }
 }
 

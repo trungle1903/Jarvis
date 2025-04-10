@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/models/prompt.dart';
+import 'package:jarvis/models/user.dart';
 import 'package:jarvis/services/api/prompt_api_service.dart';
+import 'package:jarvis/services/storage.dart';
 
 class PromptProvider with ChangeNotifier {
   final PromptApiService _apiService;
@@ -20,15 +22,15 @@ class PromptProvider with ChangeNotifier {
     bool? isPublic,
   }) async {
     try {
+      final username = await StorageService().readSecureData('user_name');
       final prompts = await _apiService.getPrompts(
         query: query,
         category: category,
         isFavorite: isFavorite,
         isPublic: isPublic,
       );
-      
       _publicPrompts = prompts.where((p) => p.isPublic).toList();
-      _myPrompts = prompts.where((p) => !p.isPublic).toList();
+      _myPrompts = prompts.where((p) => p.userName == username).toList();
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -52,4 +54,5 @@ class PromptProvider with ChangeNotifier {
     }
     notifyListeners();
   }
+
 }

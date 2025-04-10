@@ -53,7 +53,7 @@ class PromptListWidget extends StatelessWidget {
                     return UsePromptBottomSheet(
                       title: prompt.title, 
                       prompt: prompt.content,
-                      author: prompt.userName, 
+                      username: prompt.userName, 
                       description: prompt.description, 
                       category: prompt.category,
                     );

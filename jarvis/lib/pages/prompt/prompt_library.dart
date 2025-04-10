@@ -56,15 +56,12 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
     if (!mounted) return;
     setState(() => isLoading = true);
     try {
-      final api = Provider.of<PromptApiService>(context, listen: false);
       final promptProvider = Provider.of<PromptProvider>(context, listen: false);
-      final prompts = await api.getPrompts(
+      await promptProvider.loadPrompts(
         query: searchQuery,
         category: categoryMap[selectedCategoryTab],
         isFavorite: showFavoritesOnly ? true : null,
-        isPublic: selectedTab == 0 ? true : false
       );
-      promptProvider.updatePrompts(prompts);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading prompts: ${e.toString()}')),
@@ -229,7 +226,7 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
         },
         selectedColor: jvBlue,
         labelStyle: TextStyle(color: selectedCategoryTab == index ? Colors.white : Colors.black),
-        avatar: null
+        avatar: null,
       ),
     );
   }
@@ -248,14 +245,16 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
  void _showCreatePromptDialog() {
   showDialog(
     context: context, 
-    builder: (context) => CreatePromptDialog(
-      apiService: Provider.of<PromptApiService>(context, listen: false),
-      onCreate: (newPrompt) {
-        setState(() {
-        });
-        _loadPrompts();
-      },
-    )
+    builder: (context) {
+      final promptProvider = Provider.of<PromptProvider>(context, listen: false);
+      final apiService = promptProvider.api;
+      return CreatePromptDialog(
+        apiService: apiService,
+        onCreate: (newPrompt) {
+          promptProvider.addPrompt(newPrompt);
+        },
+      );
+    }
   );
  }
 }

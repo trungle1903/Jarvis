@@ -26,8 +26,7 @@ class ChatApiService {
       if (accessToken == null) {
         throw Exception('Access token is missing.');
       }
-      print('[ChatAPI] Access Token: $accessToken');
-      print('[ChatAPI] Sending Payload:');
+
       final payload = {
         'content': message,
         'files': files,
@@ -62,7 +61,7 @@ class ChatApiService {
           'id': assistantId,
         },
       };
-      print(payload);
+
       final response = await _dio.post(
         '$baseUrl/api/v1/ai-chat/messages',
         data: payload,

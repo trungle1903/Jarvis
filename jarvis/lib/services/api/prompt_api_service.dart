@@ -44,7 +44,6 @@ Future<List<Prompt>> getPrompts({
         },
       ),
     );
-
     if (response.statusCode == 200) {
     return (response.data['items'] as List)
         .map((json) => Prompt.fromJson(json))
@@ -67,7 +66,31 @@ Future<List<Prompt>> getPrompts({
   }
 
   Future<Prompt> createPrompt(Map<String, dynamic> data) async {
-    final response = await _dio.post('$baseUrl/prompts', data: data);
-    return Prompt.fromJson(response.data);
+    try {
+      final accessToken = await StorageService().readSecureData('access_token');
+
+      final response = await _dio.post(
+        '$baseUrl/api/v1/prompts',
+        data: data,
+        options: Options(
+          headers: {
+            'x-jarvis-guid': guid,
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return Prompt.fromJson(response.data);
+      } else {
+        throw Exception('Failed to create prompt: ${response.statusMessage}');
+      }
+    } on DioException catch (e) {
+      print('Status Code: ${e.response?.statusCode}');
+      throw Exception('Failed to create prompt: ${e.response?.data?['message'] ?? e.message}');
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Unexpected error: $e');
+    }
   }
 }

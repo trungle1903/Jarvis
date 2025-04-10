@@ -48,19 +48,22 @@ class StorageService {
     await StorageService().writeSecureData('access_token', user.token!);
     await StorageService().writeSecureData('refresh_token', user.refreshToken!);
     await StorageService().writeSecureData('user_id', user.id);
+    await StorageService().writeSecureData('user_email', user.email);
+    await StorageService().writeSecureData('user_name', user.name);
   }
 
-  Future<User?> getStoredUser() async {
+  Future<User?> getStoredUser(name) async {
     final accessToken = await StorageService().readSecureData('access_token');
     final refreshToken = await StorageService().readSecureData('refresh_token');
     final userId = await StorageService().readSecureData('user_id');
-
+    final userEmail = await StorageService().readSecureData('user_email');
+    String username = userEmail!.split('@')[0];
     if (accessToken == null) return null;
 
     return User(
       id: userId ?? '0',
-      name: '', // Retrieve from storage if needed
-      email: '', // Retrieve from storage if needed
+      name: username, 
+      email: userEmail, 
       token: accessToken,
       refreshToken: refreshToken,
     );

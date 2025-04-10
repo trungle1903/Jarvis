@@ -58,98 +58,111 @@ class _CreatePromptDialogState extends State<CreatePromptDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
+      child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 500,
-          maxHeight: 500,
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
         ),
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: 
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "New Prompt",
-                  style: Theme.of(context).dialogTheme.titleTextStyle,
-                ),
-                SizedBox(height: 16),
-                Text("Title *", style: TextStyle(fontWeight: FontWeight.bold)),
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    hintText: "Name of the prompt",
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) => value?.isEmpty ?? true ? 'Title is required' : null,
-                ),
-                SizedBox(height: 16),
-                Text("Description * ", style: TextStyle(fontWeight: FontWeight.bold)),
-                TextFormField(
-                  controller:  _descriptionController,
-                  decoration: InputDecoration(
-                    hintText: "Describe what your prompt does",
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 2,
-                  validator: (value) => value?.isEmpty ?? true ? 'Description is required' : null,
-                ),
-                SizedBox(height: 16),
-                Text("Prompt *",
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-                TextFormField(
-                  controller: _contentController,
-                  maxLines: 4,
-                  decoration: InputDecoration(
-                    hintText: "e.g.: Write an article about [TOPIC], make sure include these keywords: [KEYWORD]",
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) => value?.isEmpty ?? true ? 'Title is required' : null,
-                ),
-                SizedBox(height: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                "New Prompt",
+                style: Theme.of(context).dialogTheme.titleTextStyle,
+              ),),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Form(
+                  key: _formKey,
+                  child: 
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Title *", style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextFormField(
+                          controller: _titleController,
+                          decoration: InputDecoration(
+                            hintText: "Name of the prompt",
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value?.isEmpty ?? true ? 'Title is required' : null,
+                        ),
+                        SizedBox(height: 16),
+                        Text("Description * ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextFormField(
+                          controller:  _descriptionController,
+                          decoration: InputDecoration(
+                            hintText: "Describe what your prompt does",
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 2,
+                          validator: (value) => value?.isEmpty ?? true ? 'Description is required' : null,
+                        ),
+                        SizedBox(height: 16),
+                        Text("Prompt *",
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+                        TextFormField(
+                          controller: _contentController,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            hintText: "e.g.: Write an article about [TOPIC], make sure include these keywords: [KEYWORD]",
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value?.isEmpty ?? true ? 'Title is required' : null,
+                        ),
+                        SizedBox(height: 16),
 
-                Text("Category *", style: TextStyle(fontWeight: FontWeight.bold)),
-                DropdownButtonFormField<String>(
-                  value: _selectedCategory,
-                  items: categories.map((category) {
-                    return DropdownMenuItem(
-                      value: category,
-                      child: Text(category.toUpperCase()),
-                    );
-                  }).toList(),
-                  onChanged: (value) => setState(() => _selectedCategory = value!),
-                  decoration: InputDecoration(border: OutlineInputBorder()),
-                  validator: (value) => value == null ? 'Please select a category' : null,
-                ), 
+                        Text("Category *", style: TextStyle(fontWeight: FontWeight.bold)),
+                        DropdownButtonFormField<String>(
+                          value: _selectedCategory,
+                          items: categories.map((category) {
+                            return DropdownMenuItem(
+                              value: category,
+                              child: Text(category.toUpperCase()),
+                            );
+                          }).toList(),
+                          onChanged: (value) => setState(() => _selectedCategory = value!),
+                          decoration: InputDecoration(border: OutlineInputBorder()),
+                          validator: (value) => value == null ? 'Please select a category' : null,
+                        ), 
 
-                Text("Language *", style: TextStyle(fontWeight: FontWeight.bold)),
-                DropdownButtonFormField<String>(
-                  value: _selectedLanguage,
-                  items: languages.map((language) {
-                    return DropdownMenuItem(
-                      value: language,
-                      child: Text(language),
-                    );
-                  }).toList(),
-                  onChanged: (value) => setState(() => _selectedLanguage = value!),
-                  decoration: InputDecoration(border: OutlineInputBorder()),
-                  validator: (value) => value == null ? 'Please select a language' : null,
-                ), 
+                        Text("Language *", style: TextStyle(fontWeight: FontWeight.bold)),
+                        DropdownButtonFormField<String>(
+                          value: _selectedLanguage,
+                          items: languages.map((language) {
+                            return DropdownMenuItem(
+                              value: language,
+                              child: Text(language),
+                            );
+                          }).toList(),
+                          onChanged: (value) => setState(() => _selectedLanguage = value!),
+                          decoration: InputDecoration(border: OutlineInputBorder()),
+                          validator: (value) => value == null ? 'Please select a language' : null,
+                        ), 
 
-                SizedBox(height: 16),
+                        SizedBox(height: 16),
 
-                Row(
-                  children: [
-                  Text("Make Public", style: TextStyle(fontWeight: FontWeight.bold),),
-                  Spacer(),
-                  Switch(value: _isPublic, onChanged: (value) => setState(() => _isPublic = value)),
-                ],
+                        Row(
+                          children: [
+                          Text("Make Public", style: TextStyle(fontWeight: FontWeight.bold),),
+                          Spacer(),
+                          Switch(value: _isPublic, onChanged: (value) => setState(() => _isPublic = value)),
+                        ],
+                        ),
+                        
+                        SizedBox(height: 20,),
+                      ],
                 ),
-                
-                SizedBox(height: 20,),
-Row(
+              ),
+              )
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
@@ -163,9 +176,9 @@ Row(
                   ),
                 ],
               ),
-              ],
-        ),
-      ),
+            )
+          ],
+        )
       ),
     );
   }

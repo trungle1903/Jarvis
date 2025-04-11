@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/models/prompt.dart';
 import 'package:jarvis/pages/prompt/editPromptDialog.dart';
+import 'package:jarvis/pages/prompt/infoPromptDialog.dart';
 import 'package:jarvis/pages/prompt/usePromptBottomSheet.dart';
 import 'package:jarvis/services/api/prompt_api_service.dart';
 
@@ -103,7 +104,16 @@ class _PromptListWidgetState extends State<PromptListWidget> {
                 IconButton(
                   icon: Icon(Icons.info_outline, color: Colors.grey,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => InfoPromptDialog(
+                        prompt: prompt,
+                        apiService: widget.apiService,
+                        onFavoriteToggled: widget.onReload,
+                      ),
+                    );
+                  },
                 ),
               ],
               IconButton(

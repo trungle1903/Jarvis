@@ -20,7 +20,7 @@ class PromptApiService {
     bool? isFavorite,
     bool? isPublic,
     int offset = 0,
-    int limit = 3,
+    int limit = 20,
   }) async {
     try {
       final accessToken = await StorageService().readSecureData('access_token');

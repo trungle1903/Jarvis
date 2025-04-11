@@ -20,7 +20,7 @@ class _CreatePromptDialogState extends State<CreatePromptDialog> {
   final _descriptionController = TextEditingController();
   String _selectedCategory = 'other';
   String _selectedLanguage = 'English';
-  final bool _isPublic = true;
+  final bool _isPublic = false;
   bool _isLoading = false;
   final List<String> categories = [
     'business',

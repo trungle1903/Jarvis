@@ -9,6 +9,7 @@ class ChatProvider with ChangeNotifier {
   List<ChatMessage> _messages = [];
   bool _isLoading = false;
   String? _error;
+  String? _conversationId;
 
   ChatProvider(this._apiService);
 
@@ -49,7 +50,11 @@ class ChatProvider with ChangeNotifier {
         assistantName: assistantName,
         files: files,
       );
-      _messages = response.metadata.messages;
+
+      _conversationId = response.conversationId;
+      _messages.add(
+        ChatMessage(role: 'model', content: response.content, files: [], assistant: Assistant(model: 'dify', name: assistantName, id: assistantId))
+      );
       _error = null;
     } catch (e) {
       _error = e.toString();
@@ -65,6 +70,7 @@ class ChatProvider with ChangeNotifier {
   void clearConversation() {
     _messages.clear();
     _error = null;
+    _conversationId = null;
     notifyListeners();
   }
 }

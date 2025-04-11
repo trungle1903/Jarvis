@@ -76,9 +76,9 @@ class _ChatPageState extends State<ChatPage> {
 
   String _getAssistantLogo(String? model) {
     switch (model) {
-      case 'gemini':
+      case 'gemini-1.5-flash-latest':
         return 'assets/logos/gemini.png';
-      case 'gpt-4':
+      case 'gpt-4o-mini':
         return 'assets/logos/gpt.png';
       default:
         return 'assets/logos/default_ai.png';
@@ -129,11 +129,9 @@ class _ChatPageState extends State<ChatPage> {
                       return MessageTile(
                         isAI: message.role == 'model',
                         message: message.content,
-                        aiLogo: _getAssistantLogo(message.assistant?.model),
+                        aiLogo: _getAssistantLogo(message.assistant.id),
                         aiName:
-                            message.assistant?.name ??
-                            _currentAssistant?.name ??
-                            "Assistant",
+                            message.assistant.name,
                       );
                     },
                   ),

@@ -65,7 +65,7 @@ class _DropdownAIState extends State<DropdownAI> {
               child: Row(
                 children: [
                   Image.asset(
-                    _getLogoForModel(assistant.model),
+                    _getLogoForModel(assistant.id),
                     width: widget.iconSize,
                     height: widget.iconSize,
                   ),

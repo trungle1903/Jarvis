@@ -91,7 +91,7 @@ class AuthApiService {
       );
       if (refreshToken == null) return null;
       final response = await _dio.post(
-        '$baseUrl/auth/refresh',
+        '$baseUrl/api/v1/auth/sessions/current/refresh',
         data: {'refresh_token': refreshToken},
         options: Options(headers: _headerService.baseHeaders),
       );

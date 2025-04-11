@@ -78,4 +78,47 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+  
+  Future<bool> refreshAccessToken() async {
+    final newToken = await _apiService.refreshAccessToken();
+    if (newToken != null) {
+      _user = await _apiService.fetchUserProfile(newToken, await _storageService.readSecureData('refresh_token') ?? '');
+      notifyListeners();
+      return true;
+    } else {
+      _user = null;
+      await _storageService.clearAuthData();
+      notifyListeners();
+      return false;
+    }
+  }
+  static void setupDioInterceptor(Dio dio, AuthProvider authProvider) {
+    dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = await authProvider._storageService.readSecureData('access_token');
+        if (token != null) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
+      },
+      onError: (DioException error, handler) async {
+        if (error.response?.statusCode == 401) {
+          final success = await authProvider.refreshAccessToken();
+          if (success) {
+            final newToken = await authProvider._storageService.readSecureData('access_token');
+            final options = error.requestOptions;
+            options.headers['Authorization'] = 'Bearer $newToken';
+
+            // Retry the failed request
+            final clonedRequest = await dio.fetch(options);
+            return handler.resolve(clonedRequest);
+          } else {
+            await authProvider.logout();
+          }
+        }
+        return handler.next(error);
+      },
+    ));
+  }
+
 }

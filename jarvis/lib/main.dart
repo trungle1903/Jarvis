@@ -15,11 +15,19 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+
   final dio = Dio();
   final storageService = StorageService();
   final headerService = await HeaderService.initialize();
-  final chatApiService = ChatApiService(dio: dio, headerService: headerService);
-  final promptApiService = PromptApiService(dio: dio, headerService: headerService);
+
+  final authProvider = AuthProvider(
+    storageService: storageService,
+    headerService: headerService,
+    dio: dio,
+  );
+
+  AuthProvider.setupDioInterceptor(dio, authProvider);
+
   runApp(
     MultiProvider(
       providers: [

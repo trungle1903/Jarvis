@@ -60,21 +60,25 @@ class AuthApiService {
   Future<void> logout() async {
     try {
       final accessToken = await StorageService().readSecureData('access_token');
-      final refreshToken = await StorageService().readSecureData(
-        'refresh_token',
-      );
+      final refreshToken = await StorageService().readSecureData('refresh_token');
       final userId = await StorageService().readSecureData('user_id');
-
       if (accessToken != null && refreshToken != null) {
-        final response = await _dio.post(
-          '$baseUrl/auth/logout',
-          data: {
-            'access_token': accessToken,
-            'refresh_token': refreshToken,
-            'user_id': userId,
-          },
-          options: Options(headers: _headerService.baseHeaders),
+        final headers = {
+          'Authorization': 'Bearer $accessToken',
+          ..._headerService.baseHeaders,
+          'X-Stack-Refresh-Token': refreshToken,
+        };
+        final response = await _dio.delete(
+          '$baseUrl/api/v1/auth/sessions/current',
+          data: {},
+          options: Options(
+            headers: headers
+          ),
         );
+        if (response.statusCode != 200) {
+          debugPrint('Logout failed: ${response.statusCode} - ${response.data}');
+          throw Exception('Logout failed: ${response.data}');
+        }
       }
       await StorageService().clearAll();
     } catch (e) {

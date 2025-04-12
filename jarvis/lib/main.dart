@@ -25,14 +25,15 @@ void main() async {
     headerService: headerService,
     dio: dio,
   );
-
+  await authProvider.initialize();
   AuthProvider.setupDioInterceptor(dio, authProvider);
 
   runApp(
     MultiProvider(
       providers: [
         Provider<PromptApiService>(
-          create: (_) => PromptApiService(dio: dio, headerService: headerService),
+          create:
+              (_) => PromptApiService(dio: dio, headerService: headerService),
         ),
         ChangeNotifierProvider(
           create:
@@ -43,20 +44,16 @@ void main() async {
               ),
         ),
         ChangeNotifierProvider(
-          create: (context) => ChatProvider(
-            ChatApiService(
-              dio: dio,
-              headerService: headerService,
-            ),
-          ),
+          create:
+              (context) => ChatProvider(
+                ChatApiService(dio: dio, headerService: headerService),
+              ),
         ),
         ChangeNotifierProvider(
-          create: (context) => PromptProvider(
-            PromptApiService(
-              dio: dio,
-              headerService: headerService,
-            ),
-          ),
+          create:
+              (context) => PromptProvider(
+                PromptApiService(dio: dio, headerService: headerService),
+              ),
         ),
       ],
       child: MyApp(),

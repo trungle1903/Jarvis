@@ -60,7 +60,9 @@ class AuthApiService {
   Future<void> logout() async {
     try {
       final accessToken = await StorageService().readSecureData('access_token');
-      final refreshToken = await StorageService().readSecureData('refresh_token');
+      final refreshToken = await StorageService().readSecureData(
+        'refresh_token',
+      );
       final userId = await StorageService().readSecureData('user_id');
       if (accessToken != null && refreshToken != null) {
         final headers = {
@@ -71,12 +73,12 @@ class AuthApiService {
         final response = await _dio.delete(
           '$baseUrl/api/v1/auth/sessions/current',
           data: {},
-          options: Options(
-            headers: headers
-          ),
+          options: Options(headers: headers),
         );
         if (response.statusCode != 200) {
-          debugPrint('Logout failed: ${response.statusCode} - ${response.data}');
+          debugPrint(
+            'Logout failed: ${response.statusCode} - ${response.data}',
+          );
           throw Exception('Logout failed: ${response.data}');
         }
       }
@@ -110,6 +112,7 @@ class AuthApiService {
     }
     return null;
   }
+
   Future<User> fetchUserProfile(String accessToken, String refreshToken) async {
     try {
       final response = await _dio.get(

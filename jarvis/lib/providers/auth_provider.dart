@@ -25,6 +25,21 @@ class AuthProvider with ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _user != null;
 
+  Future<void> initialize() async {
+    final accessToken = await _storageService.readSecureData('access_token');
+    final refreshToken = await _storageService.readSecureData('refresh_token');
+
+    if (accessToken != null && refreshToken != null) {
+      try {
+        _user = await _apiService.fetchUserProfile(accessToken, refreshToken);
+        notifyListeners();
+      } catch (e) {
+        debugPrint('⚠️ Failed to restore session: $e');
+        await _storageService.clearAuthData();
+      }
+    }
+  }
+
   Future<void> login(String email, String password) async {
     _isLoading = true;
     _error = null;
@@ -78,11 +93,14 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   Future<bool> refreshAccessToken() async {
     final newToken = await _apiService.refreshAccessToken();
     if (newToken != null) {
-      _user = await _apiService.fetchUserProfile(newToken, await _storageService.readSecureData('refresh_token') ?? '');
+      _user = await _apiService.fetchUserProfile(
+        newToken,
+        await _storageService.readSecureData('refresh_token') ?? '',
+      );
       notifyListeners();
       return true;
     } else {
@@ -92,33 +110,43 @@ class AuthProvider with ChangeNotifier {
       return false;
     }
   }
+
   static void setupDioInterceptor(Dio dio, AuthProvider authProvider) {
-    dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final token = await authProvider._storageService.readSecureData('access_token');
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
-        return handler.next(options);
-      },
-      onError: (DioException error, handler) async {
-        if (error.response?.statusCode == 401) {
-          final success = await authProvider.refreshAccessToken();
-          if (success) {
-            final newToken = await authProvider._storageService.readSecureData('access_token');
-            final options = error.requestOptions;
-            options.headers['Authorization'] = 'Bearer $newToken';
-
-            // Retry the failed request
-            final clonedRequest = await dio.fetch(options);
-            return handler.resolve(clonedRequest);
-          } else {
-            await authProvider.logout();
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await authProvider._storageService.readSecureData(
+            'access_token',
+          );
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
           }
-        }
-        return handler.next(error);
-      },
-    ));
-  }
+          return handler.next(options);
+        },
+        onError: (DioException error, handler) async {
+          if (error.response?.statusCode == 401) {
+            final success = await authProvider.refreshAccessToken();
+            if (success) {
+              final newToken = await authProvider._storageService
+                  .readSecureData('access_token');
+              final options = error.requestOptions;
+              options.headers['Authorization'] = 'Bearer $newToken';
 
+              // Retry the failed request
+              try {
+                final clonedRequest = await dio.fetch(options);
+                return handler.resolve(clonedRequest);
+              } catch (e) {
+                debugPrint('❌ Retried request failed: $e');
+              }
+            } else {
+              debugPrint('❌ Token refresh failed. Logging out.');
+              await authProvider.logout();
+            }
+          }
+          return handler.next(error);
+        },
+      ),
+    );
+  }
 }

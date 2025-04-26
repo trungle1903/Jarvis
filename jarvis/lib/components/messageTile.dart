@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class MessageTile extends StatelessWidget {
   final bool isAI;
@@ -34,10 +35,11 @@ class MessageTile extends StatelessWidget {
               CircleAvatar(
                 backgroundImage: AssetImage(
                   isAI
-                      ? (aiLogo ?? 'assets/default_ai.png')
-                      : 'assets/user_avatar.png',
+                      ? (aiLogo ?? 'assets/logos/default_ai.png')
+                      : 'assets/logos/user_avatar.png',
                 ),
                 radius: 18,
+                backgroundColor: Colors.white,
               ),
               const SizedBox(width: 10),
               Text(
@@ -57,9 +59,16 @@ class MessageTile extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      message,
-                      style: TextStyle(color: Colors.black, fontSize: 16),
+                    Flexible(
+                      child: MarkdownBody(
+                        data: message,
+                        styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                          p: const TextStyle(fontSize: 16),
+                        ),
+                        onTapLink: (text, href, title) {
+                          
+                        },
+                      ),
                     ),
                   ],
                 ),

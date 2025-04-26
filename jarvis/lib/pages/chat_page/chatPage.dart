@@ -5,60 +5,84 @@ import 'package:jarvis/components/historyDrawer.dart';
 import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
+import 'package:jarvis/models/assistant.dart';
 import 'package:jarvis/pages/bots/create_bot_dialog.dart';
-import 'package:jarvis/pages/promp/prompt_library.dart';
+import 'package:jarvis/pages/prompt/prompt_library.dart';
+import 'package:jarvis/providers/chat_provider.dart';
+import 'package:provider/provider.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key, this.chatName = "Chat"});
   final String? chatName;
-
+  final Assistant? assistant;
+  const ChatPage({super.key, this.chatName = "Chat", this.assistant});
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-  List<MessageTile> messages = [];
   final TextEditingController _messageController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isPromptLibraryOpen = false;
+  List<Assistant> _availableAssistants = [];
+  Assistant? _currentAssistant;
+  @override
+  void initState() {
+    super.initState();
+    _loadAssistants();
+  }
 
-  final List<Map<String, String>> _aiModels = [
-    {'name': 'Gemini 1.5 Flash', 'logo': 'assets/logos/gemini.png'},
-    {'name': 'Chat GPT 4o', 'logo': 'assets/logos/gpt.png'},
-  ];
-
-  String _currentModelName = "Chat GPT";
-  String _currentModelPathLogo = "assets/logos/gpt.png";
-
-  bool _isPromptLibraryOpen = false; // Toggle between drawers
-
-  void onSendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
+  Future<void> _loadAssistants() async {
     setState(() {
-      messages.add(MessageTile(isAI: false, message: _messageController.text));
-      messages.add(
-        MessageTile(
-          isAI: true,
-          message: "Hello, this is Jarvis",
-          aiLogo: _currentModelPathLogo,
-          aiName: _currentModelName,
+      _availableAssistants = [
+        Assistant(
+          id: 'gemini-1.5-flash-latest',
+          name: 'Gemini 1.5 Flash',
+          model: 'dify',
         ),
-      );
-      _messageController.clear();
+        Assistant(id: 'gpt-4o-mini', name: 'Chat GPT 4o', model: 'dify'),
+        if (widget.assistant != null) widget.assistant!,
+      ];
+      _currentAssistant = widget.assistant ?? _availableAssistants.first;
     });
   }
 
+  void onSendMessage() {
+    if (_messageController.text.trim().isEmpty) return;
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    chatProvider.sendMessage(
+      message: _messageController.text,
+      assistantId: _currentAssistant!.id,
+      assistantName: _currentAssistant!.name,
+    );
+    _messageController.clear();
+  }
+
   void openHistoryDrawer() {
-    setState(() {
-      _isPromptLibraryOpen = false;
-    });
+    setState(() => _isPromptLibraryOpen = false);
     _scaffoldKey.currentState?.openEndDrawer();
   }
 
   void openPromptLibraryDrawer() {
-    setState(() {
-      _isPromptLibraryOpen = true;
-    });
+    setState(() => _isPromptLibraryOpen = true);
     _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  void _handleModelChange(Assistant newAssistant) {
+    setState(() {
+      _currentAssistant = newAssistant;
+      Provider.of<ChatProvider>(context, listen: false).clearConversation();
+    });
+  }
+
+  String _getAssistantLogo(String? model) {
+    switch (model) {
+      case 'gemini-1.5-flash-latest':
+        return 'assets/logos/gemini.png';
+      case 'gpt-4o-mini':
+        return 'assets/logos/gpt.png';
+      default:
+        return 'assets/logos/default_ai.png';
+    }
   }
 
   @override
@@ -75,7 +99,7 @@ class _ChatPageState extends State<ChatPage> {
         elevation: 1,
         automaticallyImplyLeading: false,
         title: Text(
-          widget.chatName ?? "Main Chat",
+          widget.chatName ?? _currentAssistant?.name ?? "Chat",
           style: const TextStyle(color: Colors.black),
         ),
         leading: IconButton(
@@ -91,101 +115,119 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  return messages[index];
-                },
-              ),
+      body: Consumer<ChatProvider>(
+        builder: (context, chatProvider, _) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: chatProvider.messages.length,
+                    itemBuilder: (context, index) {
+                      final message = chatProvider.messages[index];
+                      return MessageTile(
+                        isAI: message.role == 'model',
+                        message: message.content,
+                        aiLogo: _getAssistantLogo(message.assistant.id),
+                        aiName:
+                            message.assistant.name,
+                      );
+                    },
+                  ),
+                ),
+                if (chatProvider.isLoading)
+                  const Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                if (chatProvider.error != null)
+                  Text(
+                    chatProvider.error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                _buildInputSection(),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildInputSection() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      DropdownAI(
-                        aiModels: _aiModels,
-                        onChange: (nameModel) {
-                          setState(() {
-                            _currentModelPathLogo =
-                                _aiModels.firstWhere(
-                                  (element) => element['name'] == nameModel,
-                                )['logo']!;
-                          });
-                        },
-                      ),
-                      const SizedBox(width: 10),
-                      GradientElevatedButton(
-                        borderRadius: 50,
-                        onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => CreateBotDialog(),
-                        );
-                      },
+                  DropdownAI(
+                    assistants: _availableAssistants,
+                    currentAssistant: _currentAssistant!,
+                    onChange: _handleModelChange,
+                  ),
+                  const SizedBox(width: 10),
+                  GradientElevatedButton(
+                    borderRadius: 50,
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => CreateBotDialog(),
+                      );
+                    },
                     text: '+  Create Bot',
-                  ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.message, color: jvBlue),
-                      ),
-                    ],
                   ),
                 ],
               ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: TextField(
-                controller: _messageController,
-                decoration: InputDecoration(
-                  hintText: "Ask me anything, press '/' for prompts...",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.message, color: jvBlue),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: TextField(
+            controller: _messageController,
+            decoration: InputDecoration(
+              hintText: "Ask me anything, press '/' for prompts...",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 15,
+              ),
+              prefixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.attach_file, color: Colors.grey),
+                    onPressed: () {},
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 15,
+                  IconButton(
+                    icon: const Icon(Icons.library_books, color: Colors.grey),
+                    onPressed: openPromptLibraryDrawer,
                   ),
-                  prefixIcon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.attach_file, color: Colors.grey),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.library_books,
-                          color: Colors.grey,
-                        ),
-                        onPressed: openPromptLibraryDrawer,
-                      ),
-                    ],
-                  ),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.send, color: jvBlue),
-                    onPressed: onSendMessage,
-                  ),
-                ),
+                ],
+              ),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.send, color: jvBlue),
+                onPressed: onSendMessage,
               ),
             ),
-            const SizedBox(height: 20),
-          ],
+            onSubmitted: (_) => onSendMessage(),
+          ),
         ),
-      ),
+        const SizedBox(height: 20),
+      ],
     );
   }
 }

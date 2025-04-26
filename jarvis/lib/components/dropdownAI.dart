@@ -1,73 +1,102 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis/models/assistant.dart';
+
 class DropdownAI extends StatefulWidget {
-  DropdownAI({super.key, required this.aiModels, required this.onChange});
-  List<Map<String, String>> aiModels;
-  ValueChanged<String?> onChange;
+  final List<Assistant> assistants;
+  final Assistant currentAssistant;
+  final ValueChanged<Assistant> onChange;
+  final double iconSize;
+  final bool showText;
+
+  const DropdownAI({
+    super.key,
+    required this.assistants,
+    required this.currentAssistant,
+    required this.onChange,
+    this.iconSize = 30,
+    this.showText = true,
+  });
 
   @override
-  _DropdownAIState createState() => _DropdownAIState();
+  State<DropdownAI> createState() => _DropdownAIState();
 }
 
 class _DropdownAIState extends State<DropdownAI> {
-  late List<Map<String, String>> _aiModels;
-  late String? _selectedModel;
-  late String? _selectedLogo;
+  late Assistant _selectedAssistant;
 
   @override
   void initState() {
     super.initState();
-    _aiModels = widget.aiModels;
-    _selectedModel = widget.aiModels.last['model'];
-    _selectedLogo = widget.aiModels.last['logo'];
+    _selectedAssistant = widget.currentAssistant;
   }
 
   @override
-  void dispose() {
-    super.dispose();
+  void didUpdateWidget(covariant DropdownAI oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentAssistant.id != oldWidget.currentAssistant.id) {
+      setState(() {
+        _selectedAssistant = widget.currentAssistant;
+      });
+    }
+  }
+
+  String _getLogoForModel(String model) {
+    switch (model) {
+      case 'gemini-1.5-flash-latest':
+        return 'assets/logos/gemini.png';
+      case 'gpt-4o-mini':
+        return 'assets/logos/gpt.png';
+      default:
+        return 'assets/logos/default_ai.png';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-        child: PopupMenuButton(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16.0)),
-          ),
-          itemBuilder: (context) {
-            return _aiModels.map((model) {
-              return PopupMenuItem(
-                value: model['name'],
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 30,
-                        height: 30,
-                        child: Image.asset(model['logo']??"")),
-                    SizedBox(width: 10),
-                    Text(model['name']??""),
-                  ],
-                ),
-              );
-            }).toList();
-          },
-          onSelected: (value) {
-             setState(() {
-                _selectedModel = value.toString();
-                _selectedLogo = _aiModels.firstWhere((model) => model['name'] == _selectedModel)['logo'];
-             });
-
-             widget.onChange(_selectedModel);
-            // Handle selection here (e.g., navigate or update UI)
-          },
-          child: Row(
-            children: [
-              Image.asset(_selectedLogo??"", width: 30, height: 30,),
-              Icon(Icons.arrow_drop_up),
-              
-            ],
-          ),
+      child: PopupMenuButton<Assistant>(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16.0)),
         ),
-    );
+        itemBuilder: (context) {
+          return widget.assistants.map((assistant) {
+            return PopupMenuItem<Assistant>(
+              value: assistant,
+              child: Row(
+                children: [
+                  Image.asset(
+                    _getLogoForModel(assistant.id),
+                    width: widget.iconSize,
+                    height: widget.iconSize,
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    assistant.name,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            );
+          }).toList();
+        },
+        onSelected: (assistant) {
+          setState(() {
+            _selectedAssistant = assistant;
+          });
 
+          widget.onChange(assistant);
+        },
+        child: Row(
+          children: [
+            Image.asset(
+              _getLogoForModel(_selectedAssistant.id),
+              width: 30,
+              height: 30,
+            ),
+            Icon(Icons.arrow_drop_up),
+          ],
+        ),
+      ),
+    );
   }
 }

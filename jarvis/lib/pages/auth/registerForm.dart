@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/auth/signIn.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
+import 'package:jarvis/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class RegisterForm extends StatefulWidget {
   final VoidCallback signUpOnTap;
@@ -14,9 +16,18 @@ class RegisterForm extends StatefulWidget {
 
 class _RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
-  String _uname = '';
-  String _pword = '';
-  String _rpword = '';
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   void submit() {
     if (_formKey.currentState!.validate()) {
@@ -30,8 +41,9 @@ class _RegisterFormState extends State<RegisterForm> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
     return Container(
-      constraints: BoxConstraints(maxWidth: 400), 
+      constraints: BoxConstraints(maxWidth: 400),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -41,10 +53,7 @@ class _RegisterFormState extends State<RegisterForm> {
             children: [
               Text(
                 'Create a new account',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
               Row(
@@ -59,7 +68,10 @@ class _RegisterFormState extends State<RegisterForm> {
                     },
                     child: Text(
                       'Sign in',
-                      style: TextStyle(color: jvDeepBlue, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: jvDeepBlue,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -69,12 +81,18 @@ class _RegisterFormState extends State<RegisterForm> {
                 onPressed: () {},
                 icon: Image.asset(
                   'assets/logos/google.png',
-                  width: 24,  
+                  width: 24,
                   height: 24,
                 ),
-                label: Text('Sign up with Google', style: TextStyle(color: Colors.black),),
+                label: Text(
+                  'Sign up with Google',
+                  style: TextStyle(color: Colors.black),
+                ),
                 style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: jvLightGrey, width: 1)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: jvLightGrey, width: 1),
+                  ),
                   backgroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
                 ),
@@ -83,16 +101,21 @@ class _RegisterFormState extends State<RegisterForm> {
               Divider(),
               SizedBox(height: 30),
               TextFormField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   labelStyle: TextStyle(color: Colors.grey),
-                  floatingLabelStyle: TextStyle(color: jvDeepBlue, fontWeight: FontWeight.bold),
+                  floatingLabelStyle: TextStyle(
+                    color: jvDeepBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: jvDeepBlue, width: 1),)
+                    borderSide: BorderSide(color: jvDeepBlue, width: 1),
+                  ),
                 ),
                 style: TextStyle(color: Colors.black),
                 cursorColor: Colors.black,
@@ -104,73 +127,144 @@ class _RegisterFormState extends State<RegisterForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _uname = value!;
+                  _emailController.text = value!;
                 },
               ),
               SizedBox(height: 10),
               TextFormField(
+                controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle: TextStyle(color: Colors.grey),
-                  floatingLabelStyle: TextStyle(color: jvDeepBlue, fontWeight: FontWeight.bold),
-                  suffixIcon: Icon(Icons.visibility_off),
+                  floatingLabelStyle: TextStyle(
+                    color: jvDeepBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: jvDeepBlue, width: 1),)
+                    borderSide: BorderSide(color: jvDeepBlue, width: 1),
+                  ),
                 ),
                 style: TextStyle(color: Colors.black),
                 cursorColor: Colors.black,
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'You have to enter your password.';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _pword = value!;
-                },
+                obscureText: _obscurePassword,
+                keyboardType: TextInputType.visiblePassword,
+                validator:
+                    (value) =>
+                        value!.isEmpty ? 'Please enter your password' : null,
               ),
               SizedBox(height: 10),
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Repeat Password',
+                  labelText: 'Confirm Password',
                   labelStyle: TextStyle(color: Colors.grey),
-                  floatingLabelStyle: TextStyle(color: jvDeepBlue, fontWeight: FontWeight.bold),
-                  suffixIcon: Icon(Icons.visibility_off),
+                  floatingLabelStyle: TextStyle(
+                    color: jvDeepBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: jvDeepBlue, width: 1),)
+                    borderSide: BorderSide(color: jvDeepBlue, width: 1),
+                  ),
                 ),
                 style: TextStyle(color: Colors.black),
                 cursorColor: Colors.black,
-                obscureText: true,
+                obscureText: _obscureConfirmPassword,
                 validator: (value) {
-                  if (value == null || value.isEmpty || value != _pword) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please confirm your password';
+                  }
+                  if (value.toString() != _passwordController.text) {
                     return 'Passwords do not match';
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _rpword = value!;
-                },
               ),
               SizedBox(height: 20),
               TextButton(
-                onPressed: submit,
+                onPressed:
+                    authProvider.isLoading
+                        ? null
+                        : () async {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              await authProvider.register(
+                                _emailController.text,
+                                _passwordController.text,
+                              );
+
+                              if (authProvider.isAuthenticated) {
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/chat',
+                                  (Route<dynamic> route) => false,
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Register failed: ${e.toString()}',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        },
                 style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   foregroundColor: Colors.white,
                   backgroundColor: jvDeepBlue,
                   minimumSize: Size(double.infinity, 50),
                 ),
-                child: Text('Sign Up', style: TextStyle(color: Colors.white)),
+                child:
+                    authProvider.isLoading
+                        ? SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                        : Text(
+                          'Sign Up',
+                          style: TextStyle(color: Colors.white),
+                        ),
               ),
             ],
           ),

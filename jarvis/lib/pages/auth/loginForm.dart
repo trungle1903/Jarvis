@@ -3,6 +3,8 @@ import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/auth/forgotPassword.dart';
 import 'package:jarvis/pages/auth/signUp.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 
 class LoginForm extends StatefulWidget {
   final VoidCallback signUpOnTap;
@@ -15,23 +17,21 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-  String _uname = '';
-  String _pword = '';
-
-  void submit() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ChatPage()),
-      );
-    }
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscureText = true;
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
     return Container(
-      constraints: BoxConstraints(maxWidth: 400), 
+      constraints: BoxConstraints(maxWidth: 400),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -41,10 +41,7 @@ class _LoginFormState extends State<LoginForm> {
             children: [
               Text(
                 'Sign in to your account',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
               Row(
@@ -59,7 +56,10 @@ class _LoginFormState extends State<LoginForm> {
                     },
                     child: Text(
                       'Sign up',
-                      style: TextStyle(color: jvDeepBlue, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: jvDeepBlue,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -69,12 +69,18 @@ class _LoginFormState extends State<LoginForm> {
                 onPressed: () {},
                 icon: Image.asset(
                   'assets/logos/google.png',
-                  width: 24,  
+                  width: 24,
                   height: 24,
                 ),
-                label: Text('Sign in with Google', style: TextStyle(color: Colors.black),),
+                label: Text(
+                  'Sign in with Google',
+                  style: TextStyle(color: Colors.black),
+                ),
                 style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: jvLightGrey, width: 1)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: jvLightGrey, width: 1),
+                  ),
                   backgroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
                 ),
@@ -86,54 +92,65 @@ class _LoginFormState extends State<LoginForm> {
                 decoration: InputDecoration(
                   labelText: 'Email',
                   labelStyle: TextStyle(color: Colors.grey),
-                  floatingLabelStyle: TextStyle(color: jvDeepBlue, fontWeight: FontWeight.bold),
+                  floatingLabelStyle: TextStyle(
+                    color: jvDeepBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: jvDeepBlue, width: 1),)
+                    borderSide: BorderSide(color: jvDeepBlue, width: 1),
+                  ),
                 ),
                 style: TextStyle(color: Colors.black),
                 cursorColor: Colors.black,
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'You have to enter your email.';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _uname = value!;
-                },
+                validator:
+                    (value) =>
+                        value!.isEmpty ? 'Please enter your email' : null,
               ),
               SizedBox(height: 10),
               TextFormField(
+                controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle: TextStyle(color: Colors.grey),
-                  floatingLabelStyle: TextStyle(color: jvDeepBlue, fontWeight: FontWeight.bold),
-                  suffixIcon: Icon(Icons.visibility_off),
+                  floatingLabelStyle: TextStyle(
+                    color: jvDeepBlue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: jvDeepBlue, width: 1),)
+                    borderSide: BorderSide(color: jvDeepBlue, width: 1),
+                  ),
                 ),
                 style: TextStyle(color: Colors.black),
                 cursorColor: Colors.black,
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'You have to enter your password.';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _pword = value!;
-                },
+                obscureText: _obscureText,
+                keyboardType: TextInputType.visiblePassword,
+                textInputAction: TextInputAction.done,
+                validator:
+                    (value) =>
+                        value!.isEmpty ? 'Please enter your password' : null,
               ),
+              if (authProvider.error != null)
+                Text(authProvider.error!, style: TextStyle(color: Colors.red)),
               SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerRight,
@@ -141,7 +158,9 @@ class _LoginFormState extends State<LoginForm> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ForgotPasswordApp()),
+                      MaterialPageRoute(
+                        builder: (context) => ForgotPasswordApp(),
+                      ),
                     );
                   },
                   child: Text(
@@ -152,14 +171,59 @@ class _LoginFormState extends State<LoginForm> {
               ),
               SizedBox(height: 20),
               TextButton(
-                onPressed: submit,
+                onPressed:
+                    authProvider.isLoading
+                        ? null
+                        : () async {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              await authProvider.login(
+                                _emailController.text,
+                                _passwordController.text,
+                              );
+
+                              if (authProvider.isAuthenticated) {
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/chat',
+                                  (Route<dynamic> route) => false,
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Login failed: ${e.toString()}',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        },
                 style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   foregroundColor: Colors.white,
                   backgroundColor: jvDeepBlue,
                   minimumSize: Size(double.infinity, 50),
                 ),
-                child: Text('Sign In', style: TextStyle(color: Colors.white)),
+                child:
+                    authProvider.isLoading
+                        ? SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                        : Text(
+                          'Sign In',
+                          style: TextStyle(color: Colors.white),
+                        ),
               ),
             ],
           ),

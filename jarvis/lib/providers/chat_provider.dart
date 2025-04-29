@@ -43,19 +43,20 @@ class ChatProvider with ChangeNotifier {
             name: 'User',
             id: 'user-${DateTime.now().millisecondsSinceEpoch}',
           ),
+          createdAt: DateTime.now(),
         ),
       );
       notifyListeners();
 
       final response = await _apiService.sendMessage(
         message: message,
-        conversationId: conversationId ?? 'new-conversation',
+        conversationId: _conversationId,
         assistantId: assistantId,
         assistantName: assistantName,
         files: files,
       );
 
-      _conversationId = response.conversationId;
+      _conversationId ??= response.conversationId;
       _messages.add(
         ChatMessage(
           role: 'model',
@@ -66,6 +67,7 @@ class ChatProvider with ChangeNotifier {
             name: assistantName,
             id: assistantId,
           ),
+          createdAt: DateTime.now(),
         ),
       );
       _error = null;
@@ -95,6 +97,25 @@ class ChatProvider with ChangeNotifier {
     try {
       final conversations = await _apiService.getConversations();
       _history = conversations;
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadConversation(String conversationId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final messages = await _apiService.getConversationMessages(
+        conversationId,
+      );
+      _conversationId = conversationId;
+      _messages = messages;
     } catch (e) {
       _error = e.toString();
     } finally {

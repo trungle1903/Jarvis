@@ -69,6 +69,12 @@ class _HistoryDrawerState extends State<HistoryDrawer> {
                       timeago.format(conversation.createdAt),
                       context,
                       isCurrent: isCurrent,
+                      onTap: () {
+                        context.read<ChatProvider>().loadConversation(
+                          conversation.id,
+                        );
+                        Navigator.of(context).pop();
+                      },
                     );
                   },
                 );
@@ -84,6 +90,7 @@ class _HistoryDrawerState extends State<HistoryDrawer> {
     String title,
     String time,
     BuildContext context, {
+    required VoidCallback onTap,
     bool isCurrent = false,
   }) {
     return Card(
@@ -121,7 +128,7 @@ class _HistoryDrawerState extends State<HistoryDrawer> {
             ),
           ],
         ),
-        onTap: () {},
+        onTap: onTap,
       ),
     );
   }

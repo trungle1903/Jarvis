@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:jarvis/models/chat_message.dart';
 import 'package:jarvis/models/chat_response.dart';
 import 'package:jarvis/models/conversation.dart';
 import 'package:jarvis/services/header_service.dart';
@@ -17,7 +18,7 @@ class ChatApiService {
 
   Future<ChatResponse> sendMessage({
     required String message,
-    required String conversationId,
+    String? conversationId,
     required String assistantId,
     required String assistantName,
     List<dynamic> files = const [],
@@ -54,6 +55,8 @@ class ChatApiService {
                 },
               },
             ],
+            if (conversationId != null && conversationId.isNotEmpty)
+              'id': conversationId,
           },
         },
         'assistant': {
@@ -73,6 +76,7 @@ class ChatApiService {
           },
         ),
       );
+      print(response.data);
       return ChatResponse.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
@@ -108,5 +112,32 @@ class ChatApiService {
     } on DioException catch (e) {
       throw Exception('Failed to fetch conversatinos: ${e.message}');
     }
+  }
+
+  Future<List<ChatMessage>> getConversationMessages(
+    String conversationId,
+  ) async {
+    final accessToken = await StorageService().readSecureData('access_token');
+    if (accessToken == null) throw Exception('Access token is missing');
+
+    final response = await _dio.get(
+      '$baseUrl/api/v1/ai-chat/conversations/$conversationId/messages',
+      queryParameters: {'assistantId': 'gpt-4o-mini', 'assistantModel': 'dify'},
+      options: Options(
+        headers: {'x-jarvis-guid': '', 'Authorization': 'Bearer $accessToken'},
+      ),
+    );
+
+    final data = response.data['items'] as List<dynamic>;
+    final messages = <ChatMessage>[];
+
+    for (final item in data) {
+      final createdAt = DateTime.parse(item['createdAt']);
+
+      messages.add(ChatMessage.fromUser(item['query'], createdAt));
+      messages.add(ChatMessage.fromAssistant(item['answer'], createdAt));
+    }
+
+    return messages;
   }
 }

@@ -70,7 +70,6 @@ class _ChatPageState extends State<ChatPage> {
   void _handleModelChange(Assistant newAssistant) {
     setState(() {
       _currentAssistant = newAssistant;
-      Provider.of<ChatProvider>(context, listen: false).clearConversation();
     });
   }
 
@@ -130,8 +129,7 @@ class _ChatPageState extends State<ChatPage> {
                         isAI: message.role == 'model',
                         message: message.content,
                         aiLogo: _getAssistantLogo(message.assistant.id),
-                        aiName:
-                            message.assistant.name,
+                        aiName: message.assistant.name,
                       );
                     },
                   ),
@@ -186,7 +184,12 @@ class _ChatPageState extends State<ChatPage> {
                 ],
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Provider.of<ChatProvider>(
+                    context,
+                    listen: false,
+                  ).clearConversation();
+                },
                 icon: const Icon(Icons.message, color: jvBlue),
               ),
             ],

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jarvis/models/chat_response.dart';
+import 'package:jarvis/models/conversation.dart';
 import 'package:jarvis/services/header_service.dart';
 import 'package:jarvis/services/storage.dart';
 
@@ -79,6 +80,33 @@ class ChatApiService {
         throw Exception('Invalid request: ${e.response?.data['message']}');
       }
       rethrow;
+    }
+  }
+
+  Future<List<Conversation>> getConversations() async {
+    try {
+      final accessToken = await StorageService().readSecureData('access_token');
+      if (accessToken == null) {
+        throw Exception('Access token is missing');
+      }
+
+      final response = await _dio.get(
+        '$baseUrl/api/v1/ai-chat/conversations',
+        queryParameters: {
+          'assistantId': 'gpt-4o-mini',
+          'assistantModel': 'dify',
+        },
+        options: Options(
+          headers: {
+            'x-jarvis-guid': '',
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+      final List<dynamic> items = response.data['items'] ?? [];
+      return items.map((item) => Conversation.fromJson(item)).toList();
+    } on DioException catch (e) {
+      throw Exception('Failed to fetch conversatinos: ${e.message}');
     }
   }
 }

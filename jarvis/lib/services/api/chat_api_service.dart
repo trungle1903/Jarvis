@@ -72,7 +72,7 @@ class ChatApiService {
           },
         ),
       );
-      return ChatResponse.fromSSE(response.data);
+      return ChatResponse.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 400) {
         debugPrint(e.response?.data);

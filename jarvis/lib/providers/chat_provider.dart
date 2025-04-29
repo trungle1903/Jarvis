@@ -53,7 +53,16 @@ class ChatProvider with ChangeNotifier {
 
       _conversationId = response.conversationId;
       _messages.add(
-        ChatMessage(role: 'model', content: response.content, files: [], assistant: Assistant(model: 'dify', name: assistantName, id: assistantId))
+        ChatMessage(
+          role: 'model',
+          content: response.message,
+          files: [],
+          assistant: Assistant(
+            model: 'dify',
+            name: assistantName,
+            id: assistantId,
+          ),
+        ),
       );
       _error = null;
     } catch (e) {

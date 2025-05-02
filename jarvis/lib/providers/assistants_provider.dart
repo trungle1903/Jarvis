@@ -46,4 +46,28 @@ class AssistantProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> createAssistant({
+    required String name,
+    String? description,
+    String? instructions,
+  }) async {
+    try {
+      final newAssistant = await _apiService.createAssistant({
+        'assistantName': name,
+        if (description != null && description.isNotEmpty)
+          'description': description,
+        if (instructions != null && instructions.isNotEmpty)
+          'instructions': instructions,
+      });
+
+      _assistants.insert(0, newAssistant);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
 }

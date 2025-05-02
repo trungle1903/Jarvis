@@ -1,6 +1,6 @@
 class Assistant {
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String createdAt;
+  final String updatedAt;
   final String createdBy;
   final String updatedBy;
   final String assistantName;
@@ -25,8 +25,8 @@ class Assistant {
     return Assistant(
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      createdBy: json['createdBy'],
-      updatedBy: json['updatedBy'],
+      createdBy: json['createdBy'] ?? 'Anonymous',
+      updatedBy: json['updatedBy'] ?? 'Anonymous',
       assistantName: json['assistantName'],
       openAiAssistantId: json['openAiAssistantId'],
       instructions: json['instructions'],

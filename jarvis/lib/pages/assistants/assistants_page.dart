@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/components/sideBar.dart';
-import 'package:jarvis/pages/assistants/create_bot_dialog.dart';
+import 'package:jarvis/pages/assistants/create_assistant_dialog.dart';
+import 'package:jarvis/providers/assistants_provider.dart';
+import 'package:provider/provider.dart';
 
 class AssistantsPage extends StatefulWidget {
   const AssistantsPage({super.key});
@@ -13,13 +15,37 @@ class AssistantsPage extends StatefulWidget {
 class _AssistantsPageState extends State<AssistantsPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  String selectedFilter = "All Assistants";
+  String selectedFilter = "All";
   final List<String> filters = [
-    "All Bots",
+    "All",
     "Favorites",
     "Sort by Name",
     "Sort by Date",
   ];
+
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<AssistantProvider>(context, listen: false).fetchAssistants();
+    });
+  }
+
+  void _refreshAssistants() {
+    Provider.of<AssistantProvider>(context, listen: false).fetchAssistants(
+      query: _searchController.text,
+      isFavorite: selectedFilter == "Favorites" ? true : null,
+      order: selectedFilter == "Sort by Name" ? 'ASC' : null,
+      orderField:
+          selectedFilter == "Sort by Name"
+              ? 'assistantName'
+              : selectedFilter == "Sort by Date"
+              ? 'createdAt'
+              : null,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +78,12 @@ class _AssistantsPageState extends State<AssistantsPage> {
                     value: selectedFilter,
                     icon: const Icon(Icons.arrow_drop_down),
                     onChanged: (String? newValue) {
-                      setState(() {
-                        selectedFilter = newValue!;
-                      });
+                      if (newValue != null) {
+                        setState(() {
+                          selectedFilter = newValue;
+                        });
+                        _refreshAssistants();
+                      }
                     },
                     items:
                         filters.map<DropdownMenuItem<String>>((String value) {
@@ -67,11 +96,14 @@ class _AssistantsPageState extends State<AssistantsPage> {
 
                   // Create Bot Button
                   GradientElevatedButton(
-                    onPressed: () {
-                      showDialog(
+                    onPressed: () async {
+                      final result = await showDialog(
                         context: context,
-                        builder: (context) => CreateBotDialog(),
+                        builder: (context) => CreateAssistantDialog(),
                       );
+                      if (result) {
+                        _refreshAssistants();
+                      }
                     },
                     text: '+  Create Bot',
                   ),
@@ -81,6 +113,10 @@ class _AssistantsPageState extends State<AssistantsPage> {
 
             // Search Bar
             TextField(
+              controller: _searchController,
+              onSubmitted: (value) {
+                _refreshAssistants();
+              },
               decoration: InputDecoration(
                 hintText: "Search...",
                 prefixIcon: const Icon(Icons.search),
@@ -94,21 +130,48 @@ class _AssistantsPageState extends State<AssistantsPage> {
             ),
             const SizedBox(height: 20),
 
-            // Empty State UI
+            // Assistant List
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/imgs/no-results.png",
-                    width: 150,
-                  ), // Replace with your asset
-                  const SizedBox(height: 10),
-                  const Text(
-                    "No bots found",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              child: Consumer<AssistantProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (provider.errorMessage != null) {
+                    return Center(
+                      child: Text('Error: ${provider.errorMessage}'),
+                    );
+                  } else if (provider.assistants.isEmpty) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset("assets/imgs/no-results.png", width: 150),
+                        SizedBox(height: 10),
+                        Text(
+                          "No assistans found",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return ListView.builder(
+                      itemCount: provider.assistants.length,
+                      itemBuilder: (context, index) {
+                        final assistant = provider.assistants[index];
+                        return ListTile(
+                          title: Text(assistant.assistantName),
+                          subtitle: Text(assistant.instructions ?? ''),
+                          trailing: IconButton(
+                            onPressed: () {},
+                            icon: Icon(Icons.star, color: Colors.yellow),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                },
               ),
             ),
           ],

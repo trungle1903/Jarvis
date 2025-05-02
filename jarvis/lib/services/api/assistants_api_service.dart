@@ -8,7 +8,7 @@ class AssistantApiService {
   final Dio _dio;
   final HeaderService _headerService;
   String baseUrl = dotenv.get('KB_API_BASE_URL');
-  String guid = dotenv.get('X_JARVIS_GUID');
+  String guid = dotenv.get('KB_X_JARVIS_GUID');
 
   AssistantApiService({required Dio dio, required HeaderService headerService})
     : _dio = dio,
@@ -37,7 +37,7 @@ class AssistantApiService {
       };
 
       final response = await _dio.get(
-        '$baseUrl/kb_core/v1/ai-assistant',
+        '$baseUrl/kb-core/v1/ai-assistant',
         queryParameters: queryParams,
         options: Options(
           headers: {
@@ -46,10 +46,15 @@ class AssistantApiService {
           },
         ),
       );
-      if (response.statusCode == 200) {
-        return (response.data['items'] as List)
-            .map((json) => Assistant.fromJson(json))
-            .toList();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (response.data != null && response.data['data'] != null) {
+          final List<dynamic> dataList = response.data['data'];
+          return (response.data['data'] as List)
+              .map((json) => Assistant.fromJson(json))
+              .toList();
+        } else {
+          return [];
+        }
       } else {
         return [];
       }
@@ -69,17 +74,19 @@ class AssistantApiService {
       final accessToken = await StorageService().readSecureData('access_token');
 
       final response = await _dio.post(
-        '$baseUrl/kb_core/v1/ai-assistant',
+        '$baseUrl/kb-core/v1/ai-assistant',
         data: data,
         options: Options(
           headers: {
             'x-jarvis-guid': guid,
             'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
           },
         ),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
+        print(response.data);
         return Assistant.fromJson(response.data);
       } else {
         throw Exception(

@@ -6,7 +6,7 @@ import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/models/bot.dart';
-import 'package:jarvis/pages/assistants/create_bot_dialog.dart';
+import 'package:jarvis/pages/assistants/create_assistant_dialog.dart';
 import 'package:jarvis/pages/prompt/prompt_library.dart';
 import 'package:jarvis/providers/chat_provider.dart';
 import 'package:provider/provider.dart';
@@ -176,7 +176,7 @@ class _ChatPageState extends State<ChatPage> {
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (context) => CreateBotDialog(),
+                        builder: (context) => CreateAssistantDialog(),
                       );
                     },
                     text: '+  Create Bot',

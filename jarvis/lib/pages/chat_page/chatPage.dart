@@ -5,15 +5,15 @@ import 'package:jarvis/components/historyDrawer.dart';
 import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/models/assistant.dart';
-import 'package:jarvis/pages/bots/create_bot_dialog.dart';
+import 'package:jarvis/models/bot.dart';
+import 'package:jarvis/pages/assistants/create_bot_dialog.dart';
 import 'package:jarvis/pages/prompt/prompt_library.dart';
 import 'package:jarvis/providers/chat_provider.dart';
 import 'package:provider/provider.dart';
 
 class ChatPage extends StatefulWidget {
   final String? chatName;
-  final Assistant? assistant;
+  final Bot? assistant;
   const ChatPage({super.key, this.chatName = "Chat", this.assistant});
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -23,8 +23,8 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isPromptLibraryOpen = false;
-  List<Assistant> _availableAssistants = [];
-  Assistant? _currentAssistant;
+  List<Bot> _availableAssistants = [];
+  Bot? _currentAssistant;
   @override
   void initState() {
     super.initState();
@@ -34,12 +34,12 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _loadAssistants() async {
     setState(() {
       _availableAssistants = [
-        Assistant(
+        Bot(
           id: 'gemini-1.5-flash-latest',
           name: 'Gemini 1.5 Flash',
           model: 'dify',
         ),
-        Assistant(id: 'gpt-4o-mini', name: 'Chat GPT 4o', model: 'dify'),
+        Bot(id: 'gpt-4o-mini', name: 'Chat GPT 4o', model: 'dify'),
         if (widget.assistant != null) widget.assistant!,
       ];
       _currentAssistant = widget.assistant ?? _availableAssistants.first;
@@ -67,7 +67,7 @@ class _ChatPageState extends State<ChatPage> {
     _scaffoldKey.currentState?.openEndDrawer();
   }
 
-  void _handleModelChange(Assistant newAssistant) {
+  void _handleModelChange(Bot newAssistant) {
     setState(() {
       _currentAssistant = newAssistant;
     });

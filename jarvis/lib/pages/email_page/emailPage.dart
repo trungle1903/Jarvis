@@ -3,7 +3,7 @@ import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/components/dropdownAI.dart';
 import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/models/assistant.dart';
+import 'package:jarvis/models/bot.dart';
 import 'package:jarvis/pages/email_page/emailOptions.dart';
 
 class EmailPage extends StatefulWidget {
@@ -16,11 +16,11 @@ class EmailPage extends StatefulWidget {
 class _EmailPageState extends State<EmailPage> {
   final List<MessageTile> _messages = [];
   final TextEditingController _messageController = TextEditingController();
-  final List<Assistant> _aiModels = [
-    Assistant(id: 'gemini', name: 'Gemini 1.5 Flash', model: 'gemini'),
-    Assistant(id: 'gpt-4', name: 'Chat GPT 4o', model: 'gpt-4'),
+  final List<Bot> _aiModels = [
+    Bot(id: 'gemini', name: 'Gemini 1.5 Flash', model: 'gemini'),
+    Bot(id: 'gpt-4', name: 'Chat GPT 4o', model: 'gpt-4'),
   ];
-  late Assistant _currentAssistant;
+  late Bot _currentAssistant;
 
   @override
   void initState() {
@@ -57,7 +57,7 @@ class _EmailPageState extends State<EmailPage> {
     }
   }
 
-  void _handleModelChange(Assistant newAssistant) {
+  void _handleModelChange(Bot newAssistant) {
     setState(() {
       _currentAssistant = newAssistant;
     });

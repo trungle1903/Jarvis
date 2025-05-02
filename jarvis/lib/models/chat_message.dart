@@ -1,10 +1,10 @@
-import 'package:jarvis/models/assistant.dart';
+import 'package:jarvis/models/bot.dart';
 
 class ChatMessage {
   final String role;
   final String content;
   final List<dynamic> files;
-  final Assistant assistant;
+  final Bot assistant;
   final DateTime createdAt;
 
   ChatMessage({
@@ -20,7 +20,7 @@ class ChatMessage {
       role: json['role'],
       content: json['content'],
       files: json['files'] ?? [],
-      assistant: Assistant.fromJson(json['assistant']),
+      assistant: Bot.fromJson(json['assistant']),
       createdAt: DateTime.parse(json['createdAt']),
     );
   }
@@ -37,7 +37,7 @@ class ChatMessage {
       role: 'user',
       content: query,
       files: [],
-      assistant: Assistant(id: 'user', name: 'User', model: 'user'),
+      assistant: Bot(id: 'user', name: 'User', model: 'user'),
       createdAt: createdAt,
     );
   }
@@ -47,7 +47,7 @@ class ChatMessage {
       role: 'model',
       content: answer,
       files: [],
-      assistant: Assistant(
+      assistant: Bot(
         id: 'assistant',
         name: 'Jarvis',
         model: 'dify', // or whatever model you use

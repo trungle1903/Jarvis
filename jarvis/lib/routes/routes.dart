@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/pages/bots/bots_page.dart';
+import 'package:jarvis/pages/assistants/assistants_page.dart';
 import 'package:jarvis/pages/email_page/emailPage.dart';
 import 'package:jarvis/pages/auth/forgotPassword.dart';
 import 'package:jarvis/pages/group_page.dart';
@@ -23,7 +23,7 @@ class Routes {
 
   static final routes = <String, WidgetBuilder>{
     chat: (BuildContext context) => AuthGuard(child: ChatPage()),
-    bots: (BuildContext context) => AuthGuard(child: BotsPage()),
+    bots: (BuildContext context) => AuthGuard(child: AssistantsPage()),
     groups: (BuildContext context) => AuthGuard(child: GroupManagementPage()),
     email: (BuildContext context) => AuthGuard(child: EmailPage()),
     signIn: (BuildContext context) => SignInApp(),

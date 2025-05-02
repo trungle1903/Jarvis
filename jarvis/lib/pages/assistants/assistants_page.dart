@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/components/sideBar.dart';
-import 'package:jarvis/pages/bots/create_bot_dialog.dart';
+import 'package:jarvis/pages/assistants/create_bot_dialog.dart';
 
-class BotsPage extends StatefulWidget {
-  const BotsPage({super.key});
+class AssistantsPage extends StatefulWidget {
+  const AssistantsPage({super.key});
 
   @override
-  State<BotsPage> createState() => _BotsPageState();
+  State<AssistantsPage> createState() => _AssistantsPageState();
 }
 
-class _BotsPageState extends State<BotsPage> {
+class _AssistantsPageState extends State<AssistantsPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  String selectedFilter = "All Bots";
+  String selectedFilter = "All Assistants";
   final List<String> filters = [
     "All Bots",
     "Favorites",
@@ -29,7 +29,7 @@ class _BotsPageState extends State<BotsPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        title: const Text("Bots", style: TextStyle(color: Colors.black)),
+        title: const Text("Assistants", style: TextStyle(color: Colors.black)),
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.black),
           onPressed: () {

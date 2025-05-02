@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/models/assistant.dart';
+import 'package:jarvis/models/bot.dart';
 
 class DropdownAI extends StatefulWidget {
-  final List<Assistant> assistants;
-  final Assistant currentAssistant;
-  final ValueChanged<Assistant> onChange;
+  final List<Bot> assistants;
+  final Bot currentAssistant;
+  final ValueChanged<Bot> onChange;
   final double iconSize;
   final bool showText;
 
@@ -22,7 +22,7 @@ class DropdownAI extends StatefulWidget {
 }
 
 class _DropdownAIState extends State<DropdownAI> {
-  late Assistant _selectedAssistant;
+  late Bot _selectedAssistant;
 
   @override
   void initState() {
@@ -54,13 +54,13 @@ class _DropdownAIState extends State<DropdownAI> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: PopupMenuButton<Assistant>(
+      child: PopupMenuButton<Bot>(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16.0)),
         ),
         itemBuilder: (context) {
           return widget.assistants.map((assistant) {
-            return PopupMenuItem<Assistant>(
+            return PopupMenuItem<Bot>(
               value: assistant,
               child: Row(
                 children: [

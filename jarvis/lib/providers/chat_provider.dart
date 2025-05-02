@@ -1,6 +1,6 @@
 // providers/chat_provider.dart
 import 'package:flutter/foundation.dart';
-import 'package:jarvis/models/assistant.dart';
+import 'package:jarvis/models/bot.dart';
 import 'package:jarvis/models/chat_message.dart';
 import 'package:jarvis/models/conversation.dart';
 import 'package:jarvis/services/api/chat_api_service.dart';
@@ -38,7 +38,7 @@ class ChatProvider with ChangeNotifier {
           role: 'user',
           content: message,
           files: files,
-          assistant: Assistant(
+          assistant: Bot(
             model: 'knowledge-base',
             name: 'User',
             id: 'user-${DateTime.now().millisecondsSinceEpoch}',
@@ -62,11 +62,7 @@ class ChatProvider with ChangeNotifier {
           role: 'model',
           content: response.message,
           files: [],
-          assistant: Assistant(
-            model: 'dify',
-            name: assistantName,
-            id: assistantId,
-          ),
+          assistant: Bot(model: 'dify', name: assistantName, id: assistantId),
           createdAt: DateTime.now(),
         ),
       );

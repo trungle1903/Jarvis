@@ -160,12 +160,64 @@ class _AssistantsPageState extends State<AssistantsPage> {
                       itemCount: provider.assistants.length,
                       itemBuilder: (context, index) {
                         final assistant = provider.assistants[index];
-                        return ListTile(
-                          title: Text(assistant.assistantName),
-                          subtitle: Text(assistant.instructions ?? ''),
-                          trailing: IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.star, color: Colors.yellow),
+                        return Card.outlined(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      assistant.assistantName,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Divider(
+                                      height: 6,
+                                      thickness: 1,
+                                      color: Colors.grey,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: Icon(
+                                            Icons.star,
+                                            color: Colors.yellow,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: Icon(
+                                            Icons.edit,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.red,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  assistant.instructions,
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },

@@ -29,8 +29,8 @@ class Assistant {
       updatedBy: json['updatedBy'] ?? 'Anonymous',
       assistantName: json['assistantName'],
       openAiAssistantId: json['openAiAssistantId'],
-      instructions: json['instructions'],
-      description: json['description'],
+      instructions: json['instructions'] ?? 'No instructions available',
+      description: json['description'] ?? 'No description available',
       openAiThreadIdPlay: json['openAiThreadIdPlay'],
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/pages/assistants/create_assistant_dialog.dart';
+import 'package:jarvis/pages/assistants/edit_assistant_dialog.dart';
 import 'package:jarvis/providers/assistants_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -161,9 +162,13 @@ class _AssistantsPageState extends State<AssistantsPage> {
                       itemBuilder: (context, index) {
                         final assistant = provider.assistants[index];
                         return Card.outlined(
+                          margin: EdgeInsets.symmetric(vertical: 8),
                           color: Colors.white,
                           child: Padding(
-                            padding: EdgeInsets.all(16),
+                            padding: EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 24,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -178,11 +183,6 @@ class _AssistantsPageState extends State<AssistantsPage> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    Divider(
-                                      height: 6,
-                                      thickness: 1,
-                                      color: Colors.grey,
-                                    ),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
@@ -194,14 +194,66 @@ class _AssistantsPageState extends State<AssistantsPage> {
                                           ),
                                         ),
                                         IconButton(
-                                          onPressed: () {},
+                                          onPressed: () async {
+                                            final result = await showDialog(
+                                              context: context,
+                                              builder:
+                                                  (context) =>
+                                                      EditAssistantDialog(
+                                                        assistant: assistant,
+                                                      ),
+                                            );
+                                            if (result == true) {
+                                              _refreshAssistants();
+                                            }
+                                          },
                                           icon: Icon(
                                             Icons.edit,
                                             color: Colors.grey,
                                           ),
                                         ),
                                         IconButton(
-                                          onPressed: () {},
+                                          onPressed: () async {
+                                            final confirm = await showDialog<
+                                              bool
+                                            >(
+                                              context: context,
+                                              builder:
+                                                  (context) => AlertDialog(
+                                                    title: Text(
+                                                      'Delete Assistant',
+                                                    ),
+                                                    content: Text(
+                                                      'Are you sure you want to delete this assistant?',
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed:
+                                                            () => Navigator.pop(
+                                                              context,
+                                                              false,
+                                                            ),
+                                                        child: Text('Cancel'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed:
+                                                            () => Navigator.pop(
+                                                              context,
+                                                              true,
+                                                            ),
+                                                        child: Text('Delete'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                            );
+                                            if (confirm == true) {
+                                              await provider.api
+                                                  .deleteAssistant(
+                                                    assistant.id,
+                                                  );
+                                              _refreshAssistants();
+                                            }
+                                          },
                                           icon: Icon(
                                             Icons.delete_outline,
                                             color: Colors.red,

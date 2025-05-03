@@ -1,4 +1,5 @@
 class Assistant {
+  final String id;
   final String createdAt;
   final String updatedAt;
   final String createdBy;
@@ -10,6 +11,7 @@ class Assistant {
   final String openAiThreadIdPlay;
 
   Assistant({
+    required this.id,
     required this.createdAt,
     required this.updatedAt,
     required this.createdBy,
@@ -23,6 +25,7 @@ class Assistant {
 
   factory Assistant.fromJson(Map<String, dynamic> json) {
     return Assistant(
+      id: json['id'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       createdBy: json['createdBy'] ?? 'Anonymous',

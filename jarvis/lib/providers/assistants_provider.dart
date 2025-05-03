@@ -70,4 +70,33 @@ class AssistantProvider with ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> updateAssistant({
+    required String id,
+    required String name,
+    required String description,
+    required String instructions,
+  }) async {
+    try {
+      final updatedAssistant = await _apiService.updateAssistant(
+        id: id,
+        name: name,
+        description: description,
+        instructions: instructions,
+      );
+
+      final index = assistants.indexWhere((a) => a.id == id);
+      if (index != -1) {
+        assistants[index] = updatedAssistant;
+        notifyListeners();
+      }
+
+      return true;
+    } catch (e) {
+      print('Update assistant failed: $e');
+      _errorMessage = 'Failed to update assistant.';
+      notifyListeners();
+      return false;
+    }
+  }
 }

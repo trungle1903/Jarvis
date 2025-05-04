@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/pages/assistants/assistants_page.dart';
 import 'package:jarvis/pages/email_page/emailPage.dart';
 import 'package:jarvis/pages/auth/forgotPassword.dart';
-import 'package:jarvis/pages/group_page.dart';
+import 'package:jarvis/pages/knowledge_base/knowledge_page.dart';
 import 'package:jarvis/pages/auth/signIn.dart';
 import 'package:jarvis/pages/auth/signUp.dart';
 import 'package:jarvis/pages/chat_page/chatPage.dart';
@@ -14,7 +14,7 @@ class Routes {
 
   static const String chat = '/chat';
   static const String bots = '/bots';
-  static const String groups = '/groups';
+  static const String data = '/knowledge-base';
   static const String email = '/email';
   static const String pricing = "/pricing";
   static const String signIn = "/signIn";
@@ -24,7 +24,7 @@ class Routes {
   static final routes = <String, WidgetBuilder>{
     chat: (BuildContext context) => AuthGuard(child: ChatPage()),
     bots: (BuildContext context) => AuthGuard(child: AssistantsPage()),
-    groups: (BuildContext context) => AuthGuard(child: GroupManagementPage()),
+    data: (BuildContext context) => AuthGuard(child: KnowledgeBasePage()),
     email: (BuildContext context) => AuthGuard(child: EmailPage()),
     signIn: (BuildContext context) => SignInApp(),
     signUp: (BuildContext context) => SignUpApp(),

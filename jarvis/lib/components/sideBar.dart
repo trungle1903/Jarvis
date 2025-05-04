@@ -50,7 +50,7 @@ class SideBar extends StatelessWidget {
           // Navigation Items
           buildNavItem(Icons.chat, "Chat", 0, context, "/chat"),
           buildNavItem(Icons.smart_toy, "BOT", 1, context, "/bots"),
-          buildNavItem(Icons.group, "Group", 2, context, "/groups"),
+          buildNavItem(Icons.storage_rounded, "Data", 2, context, "/knowledge-base"),
           buildNavItem(Icons.email, "Email Generator", 3, context, "/email"),
           buildNavItem(Icons.price_check, "Pricing", 4, context, "/pricing"),
           const Spacer(),

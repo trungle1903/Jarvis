@@ -25,21 +25,23 @@ class Knowledge {
     required this.totalSize,
   });
 
-  factory Knowledge.fromJson(Map<String, dynamic> json) {
-    return Knowledge(
-      id: json['id'] as String,
-      knowledgeName: json['knowledgeName'] as String,
-      description: json['description'] as String,
-      userId: json['userId'] as String,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-      createdBy: json['createdBy'] as String?,
-      updatedBy: json['updatedBy'] as String?,
-      deletedAt: json['deletedAt'] != null ? DateTime.tryParse(json['deletedAt']) : null,
-      numUnits: json['numUnits'] as int,
-      totalSize: json['totalSize'] as int,
-    );
-  }
+factory Knowledge.fromJson(Map<String, dynamic> json) {
+  return Knowledge(
+    id: json['id'] ?? '',
+    knowledgeName: json['knowledgeName'] ?? '',
+    description: json['description'] ?? '',
+    userId: json['userId'] ?? '',
+    createdAt: DateTime.parse(json['createdAt']),
+    updatedAt: DateTime.parse(json['updatedAt']),
+    createdBy: json['createdBy'] as String?,
+    updatedBy: json['updatedBy'] as String?,
+    deletedAt: (json['deletedAt'] != null && json['deletedAt'] != '')
+        ? DateTime.parse(json['deletedAt'])
+        : null,
+    numUnits: (json['numUnits'] is int) ? json['numUnits'] : int.tryParse(json['numUnits']?.toString() ?? '0') ?? 0,
+    totalSize: (json['totalSize'] is int) ? json['totalSize'] : int.tryParse(json['totalSize']?.toString() ?? '0') ?? 0,
+  );
+}
 
   Map<String, dynamic> toJson() {
     return {

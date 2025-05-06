@@ -69,12 +69,12 @@ class KnowledgeBaseApiService {
     }
   }
 
-  Future<Assistant> createAssistant(Map<String, dynamic> data) async {
+  Future<Knowledge> createKnowledgeBase(Map<String, dynamic> data) async {
     try {
       final accessToken = await StorageService().readSecureData('access_token');
 
       final response = await _dio.post(
-        '$baseUrl/kb-core/v1/ai-assistant',
+        '$baseUrl/kb-core/v1/knowledge',
         data: data,
         options: Options(
           headers: {
@@ -86,17 +86,16 @@ class KnowledgeBaseApiService {
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        print(response.data);
-        return Assistant.fromJson(response.data);
+        return Knowledge.fromJson(response.data);
       } else {
         throw Exception(
-          'Failed to create assistant: ${response.statusMessage}',
+          'Failed to create KB: ${response.statusMessage}',
         );
       }
     } on DioException catch (e) {
       print('Status Code: ${e.response?.statusCode}');
       throw Exception(
-        'Failed to create assistant: ${e.response?.data?['message'] ?? e.message}',
+        'Failed to create KB: ${e.response?.data?['message'] ?? e.message}',
       );
     } catch (e) {
       print('Error: $e');
@@ -104,10 +103,10 @@ class KnowledgeBaseApiService {
     }
   }
 
-  Future<void> deleteAssistant(String id) async {
+  Future<void> deleteKnowledgeBase(String id) async {
     final accessToken = await StorageService().readSecureData('access_token');
     await _dio.delete(
-      '$baseUrl/kb-core/v1/ai-assistant/$id',
+      '$baseUrl/kb-core/v1/knowledge/$id',
       options: Options(
         headers: {
           'x-jarvis-guid': guid,
@@ -117,19 +116,17 @@ class KnowledgeBaseApiService {
     );
   }
 
-  Future<Assistant> updateAssistant({
+  Future<Knowledge> updateKnowledgeBase({
     required String id,
     required String name,
     required String description,
-    required String instructions,
   }) async {
     final accessToken = await StorageService().readSecureData('access_token');
     final response = await _dio.patch(
-      '$baseUrl/kb-core/v1/ai-assistant/$id',
+      '$baseUrl/kb-core/v1/knowledge/$id',
       data: {
-        'assistantName': name,
+        'knowledgeName': name,
         'description': description,
-        'instructions': instructions,
       },
       options: Options(
         headers: {
@@ -138,41 +135,7 @@ class KnowledgeBaseApiService {
         },
       ),
     );
-
-    return Assistant.fromJson(response.data);
-  }
-
-  Future<void> favoriteAssistant(String assistantId) async {
-    final accessToken = await StorageService().readSecureData('access_token');
-    final response = await _dio.post(
-      '$baseUrl/kb-core/v1/ai-assistant/$assistantId/favorite',
-      options: Options(
-        headers: {
-          'x-jarvis-guid': guid,
-          'Authorization': 'Bearer $accessToken',
-        },
-      ),
-    );
-    if (response.statusCode != 201) {
-      throw Exception('Failed to favorite assistant');
-    }
-  }
-
-  Future<void> unfavoriteAssistant(String assistantId) async {
-    final accessToken = await StorageService().readSecureData('access_token');
-
-    final response = await _dio.delete(
-      '$baseUrl/kb-core/v1/ai-assistant/$assistantId/favorite',
-      options: Options(
-        headers: {
-          'x-jarvis-guid': guid,
-          'Authorization': 'Bearer $accessToken',
-        },
-      ),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to remove assistant from favorites');
-    }
+    print(response.data);
+    return Knowledge.fromJson(response.data);
   }
 }

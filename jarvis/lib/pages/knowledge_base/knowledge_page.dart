@@ -3,6 +3,7 @@ import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/knowledge_base/create_kb_dialog.dart';
+import 'package:jarvis/pages/knowledge_base/edit_kb_dialog.dart';
 import 'package:jarvis/providers/kb_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -76,9 +77,15 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
                 ),
                 const SizedBox(width: 10),
                 GradientElevatedButton(
-                  onPressed: () {
-                    showDialog(context: context, builder: (context) => CreateKnowledgeBaseDialog());
-                  },
+                  onPressed: () async {
+                      final result = await showDialog(
+                        context: context,
+                        builder: (context) => CreateKnowledgeBaseDialog(),
+                      );
+                      if (result) {
+                        _refreshKnowledgeBases();
+                      }
+                    },
                   text: '+  Create Knowledge',
                 ),
               ],
@@ -136,14 +143,44 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
                                     ),
                                     Row(
                                       children: [
-                                        IconButton(onPressed: () {}, icon: Icon(Icons.edit), color: Colors.grey,),
-                                        IconButton(onPressed: () {}, icon: Icon(Icons.delete), color: Colors.red,)
+                                        IconButton(onPressed: () async {
+                                          final result = await showDialog(
+                                            context: context, 
+                                            builder: 
+                                              (context) => EditKnowledgeBaseDialog(knowledge: kb)
+                                          );
+                                          if (result) {_refreshKnowledgeBases();}
+                                        }, icon: Icon(Icons.edit), color: Colors.grey,),
+                                        IconButton(onPressed: () async {
+                                          final confirm = await showDialog<bool>(
+                                            context: context,
+                                            builder: 
+                                              (context) => AlertDialog(
+                                                title: Text('Delete Knowledge Base'),
+                                                content: Text('Are you sure you want to delete this Knowledge Base?'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, false), 
+                                                    child: Text('Cancel')
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, true), 
+                                                    child: Text('Delete')
+                                                  )
+                                                ],
+                                              )
+                                          );
+                                          if (confirm == true) {
+                                            await provider.api.deleteKnowledgeBase(kb.id);
+                                            _refreshKnowledgeBases();
+                                          }
+                                        }, icon: Icon(Icons.delete), color: Colors.red,)
                                       ],
                                     ),
                                   ],
                                 ),
                                 SizedBox(height: 8,),
-                                Text(kb.description, style: TextStyle(color: Colors.grey),)
+                                Text(kb.description ?? 'No description available', style: TextStyle(color: Colors.grey),)
                               ],
                              ),
                           ),

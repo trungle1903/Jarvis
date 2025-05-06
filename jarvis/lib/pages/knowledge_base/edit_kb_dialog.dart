@@ -4,57 +4,59 @@ import 'package:jarvis/models/knowledge.dart';
 import 'package:jarvis/providers/kb_provider.dart';
 import 'package:provider/provider.dart';
 
-class CreateKnowledgeBaseDialog extends StatefulWidget {
+class EditKnowledgeBaseDialog extends StatefulWidget {
+  final Knowledge knowledge;
+  const EditKnowledgeBaseDialog({super.key, required this.knowledge});
   @override
-  _CreateKnowledgeBaseDialogState createState() => _CreateKnowledgeBaseDialogState();
+  _EditKnowledgeBaseDialogState createState() => _EditKnowledgeBaseDialogState();
 }
 
-class _CreateKnowledgeBaseDialogState extends State<CreateKnowledgeBaseDialog> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  bool isCreateEnabled = false;
+class _EditKnowledgeBaseDialogState extends State<EditKnowledgeBaseDialog> {
+  late TextEditingController _nameController = TextEditingController();
+  late TextEditingController _descriptionController = TextEditingController();
+  bool isUpdateEnabled = false;
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _nameController.addListener(_updateCreateButtonState);
+    _nameController = TextEditingController(text: widget.knowledge.knowledgeName);
+    _descriptionController = TextEditingController(text:widget.knowledge.description);
+    _nameController.addListener(_updateUpdateButtonState);
+    _updateUpdateButtonState();
   }
 
-  void _updateCreateButtonState() {
+  void _updateUpdateButtonState() {
     setState(() {
-      isCreateEnabled = _nameController.text.trim().isNotEmpty;
+      isUpdateEnabled = _nameController.text.trim().isNotEmpty;
     });
   }
 
-  Future<void> _createKnowledgeBase() async {
-    if (!isCreateEnabled) return;
+  Future<void> _editKnowledgeBase() async {
+    if (!isUpdateEnabled) return;
 
     setState(() {
       isLoading = true;
     });
 
-    try {
-      final knowledgeName = _nameController.text.trim();
-      final description = _descriptionController.text.trim();
+    final knowledgeName = _nameController.text.trim();
+    final description = _descriptionController.text.trim();
 
-      bool success = await Provider.of<KnowledgeBaseProvider>(context, listen: false).createKnowledgeBase(
-        name: knowledgeName,
-        description: description,
-      );
-      if (success) {
-        Navigator.pop(context,true);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create KB: $e'))
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+    final success = await Provider.of<KnowledgeBaseProvider>(context, listen: false).updateKnowledgeBase(
+      id: widget.knowledge.id,
+      name: knowledgeName,
+      description: description,
+    );
+
+    setState(() {
+      isLoading = false;
+    });
+
+
+    if (success) {
+      Navigator.pop(context,true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update KB')));
     }
 
   }
@@ -81,7 +83,7 @@ class _CreateKnowledgeBaseDialogState extends State<CreateKnowledgeBaseDialog> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Create Knowledge Base",
+                    "Edit Knowledge Base",
                     style: Theme.of(context).dialogTheme.titleTextStyle,
                   ),
                   const SizedBox(height: 16),
@@ -130,8 +132,8 @@ class _CreateKnowledgeBaseDialogState extends State<CreateKnowledgeBaseDialog> {
                 isLoading
                     ? const CircularProgressIndicator()
                     : GradientElevatedButton(
-                        onPressed: isCreateEnabled ? _createKnowledgeBase : () {},
-                        text: 'Create',
+                        onPressed: isUpdateEnabled ? _editKnowledgeBase : () {},
+                        text: 'Update',
                       ),
               ],
             ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/models/assistant.dart';
 import 'package:jarvis/models/knowledge.dart';
 import 'package:jarvis/services/api/kb_api_service.dart';
 
@@ -48,21 +47,18 @@ class KnowledgeBaseProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> createAssistant({
+  Future<bool> createKnowledgeBase({
     required String name,
     String? description,
-    String? instructions,
   }) async {
     try {
-      final newAssistant = await _apiService.createAssistant({
-        'assistantName': name,
+      final newKnowledge = await _apiService.createKnowledgeBase({
+        'knowledgeName': name,
         if (description != null && description.isNotEmpty)
           'description': description,
-        if (instructions != null && instructions.isNotEmpty)
-          'instructions': instructions,
       });
 
-      //_knowledges.insert(0, newAssistant);
+      knowledges.insert(0, newKnowledge);
       notifyListeners();
       return true;
     } catch (e) {
@@ -72,30 +68,28 @@ class KnowledgeBaseProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> updateAssistant({
+  Future<bool> updateKnowledgeBase({
     required String id,
     required String name,
     required String description,
-    required String instructions,
   }) async {
     try {
-      final updatedAssistant = await _apiService.updateAssistant(
+      final updatedKnowledge = await _apiService.updateKnowledgeBase(
         id: id,
         name: name,
         description: description,
-        instructions: instructions,
       );
 
       final index = knowledges.indexWhere((a) => a.id == id);
       if (index != -1) {
-        //assistants[index] = updatedAssistant;
+        knowledges[index] = updatedKnowledge;
         notifyListeners();
       }
 
       return true;
     } catch (e) {
-      print('Update assistant failed: $e');
-      _errorMessage = 'Failed to update assistant.';
+      print('Update KB failed: $e');
+      _errorMessage = 'Failed to update KB.';
       notifyListeners();
       return false;
     }

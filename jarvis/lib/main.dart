@@ -1,14 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:jarvis/pages/chat_page/chatPage.dart';
 import 'package:jarvis/providers/assistants_provider.dart';
 import 'package:jarvis/providers/auth_provider.dart';
 import 'package:jarvis/providers/chat_provider.dart';
+import 'package:jarvis/providers/kb_provider.dart';
 import 'package:jarvis/providers/prompt_provider.dart';
 import 'package:jarvis/routes/routes.dart';
 import 'package:jarvis/services/api/assistants_api_service.dart';
 import 'package:jarvis/services/api/chat_api_service.dart';
+import 'package:jarvis/services/api/kb_api_service.dart';
 import 'package:jarvis/services/api/prompt_api_service.dart';
 import 'package:jarvis/services/header_service.dart';
 import 'package:jarvis/services/storage.dart';
@@ -61,6 +62,12 @@ void main() async {
           create:
               (context) => AssistantProvider(
                 AssistantApiService(dio: dio, headerService: headerService),
+              ),
+        ),
+        ChangeNotifierProvider(
+          create:
+              (context) => KnowledgeBaseProvider(
+                KnowledgeBaseApiService(dio: dio, headerService: headerService),
               ),
         ),
       ],

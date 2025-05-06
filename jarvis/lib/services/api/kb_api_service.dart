@@ -1,20 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jarvis/models/assistant.dart';
+import 'package:jarvis/models/knowledge.dart';
 import 'package:jarvis/services/header_service.dart';
 import 'package:jarvis/services/storage.dart';
 
-class AssistantApiService {
+class KnowledgeBaseApiService {
   final Dio _dio;
   final HeaderService _headerService;
   String baseUrl = dotenv.get('KB_API_BASE_URL');
   String guid = dotenv.get('KB_X_JARVIS_GUID');
 
-  AssistantApiService({required Dio dio, required HeaderService headerService})
+  KnowledgeBaseApiService({required Dio dio, required HeaderService headerService})
     : _dio = dio,
       _headerService = headerService;
 
-  Future<List<Assistant>> getAssistants({
+  Future<List<Knowledge>> getKnowledges({
     String? query,
     String? order,
     String? order_field,
@@ -37,7 +38,7 @@ class AssistantApiService {
       };
 
       final response = await _dio.get(
-        '$baseUrl/kb-core/v1/ai-assistant',
+        '$baseUrl/kb-core/v1/knowledge',
         queryParameters: queryParams,
         options: Options(
           headers: {
@@ -47,11 +48,9 @@ class AssistantApiService {
         ),
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print(response.data);
         if (response.data != null && response.data['data'] != null) {
           final List<dynamic> dataList = response.data['data'];
-          return dataList
-              .map((json) => Assistant.fromJson(json))
+          return dataList.map((json) => Knowledge.fromJson(json))
               .toList();
         } else {
           return [];
@@ -62,7 +61,7 @@ class AssistantApiService {
     } on DioException catch (e) {
       print('Status Code: ${e.response?.statusCode}');
       throw Exception(
-        'Failed to fetch assistant: ${e.response?.data?['message'] ?? e.message}',
+        'Failed to fetch knowledges: ${e.response?.data?['message'] ?? e.message}',
       );
     } catch (e) {
       print('Error: $e');

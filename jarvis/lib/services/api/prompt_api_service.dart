@@ -20,7 +20,7 @@ class PromptApiService {
     bool? isFavorite,
     bool? isPublic,
     int offset = 0,
-    int limit = 20,
+    int limit = 345,
   }) async {
     try {
       final accessToken = await StorageService().readSecureData('access_token');
@@ -45,6 +45,7 @@ class PromptApiService {
         ),
       );
       if (response.statusCode == 200) {
+      print(response.data['total']);
       return (response.data['items'] as List)
           .map((json) => Prompt.fromJson(json))
           .toList();

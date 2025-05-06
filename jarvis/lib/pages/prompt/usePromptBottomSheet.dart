@@ -56,7 +56,6 @@ class _UsePromptBottomSheetState extends State<UsePromptBottomSheet> {
       ? "${widget.prompt}\n\n input is: $userInput"
       : widget.prompt;
     widget.onSend(promptMessage);
-    print('Sending prompt message: $promptMessage');
   }
 
   @override

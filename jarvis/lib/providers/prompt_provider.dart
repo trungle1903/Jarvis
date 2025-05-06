@@ -29,7 +29,7 @@ class PromptProvider with ChangeNotifier {
         isFavorite: isFavorite,
         isPublic: isPublic,
       );
-      _publicPrompts = prompts.where((p) => p.isPublic).toList();
+      _publicPrompts = prompts.where((p) => p.isPublic && p.userName == 'Jarvis AI Team').toList();
       _myPrompts = prompts.where((p) => p.userName == username).toList();
       notifyListeners();
     } catch (e) {

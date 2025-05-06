@@ -11,7 +11,9 @@ import 'package:jarvis/pages/assistants/create_assistant_dialog.dart';
 import 'package:jarvis/pages/prompt/prompt_library.dart';
 import 'package:jarvis/pages/prompt/usePromptBottomSheet.dart';
 import 'package:jarvis/providers/chat_provider.dart';
+import 'package:jarvis/providers/prompt_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:jarvis/pages/chat_page/slashPrompt.dart';
 
 class ChatPage extends StatefulWidget {
   final String? chatName;
@@ -24,13 +26,27 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey _textFieldKey = GlobalKey();
   bool _isPromptLibraryOpen = false;
   List<Bot> _availableAssistants = [];
   Bot? _currentAssistant;
+  OverlayEntry? _overlayEntry;
+  bool _isPromptSelectorOpen = false;
+  List<Prompt> _cachedPrompts = [];
+
   @override
   void initState() {
     super.initState();
+    _messageController.addListener(_handleSlashCommand);
     _loadAssistants();
+  }
+
+  @override
+  void dispose() {
+    _messageController.removeListener(_handleSlashCommand);
+    _messageController.dispose();
+    _removeOverlay();
+    super.dispose();
   }
 
   Future<void> _loadAssistants() async {
@@ -47,7 +63,135 @@ class _ChatPageState extends State<ChatPage> {
       _currentAssistant = widget.assistant ?? _availableAssistants.first;
     });
   }
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    _isPromptSelectorOpen = false;
+  }
 
+  void _showPromptDropdown(List<Prompt> prompts, String keyword) {
+    if (_textFieldKey.currentContext == null) return;
+
+    final RenderBox renderBox = _textFieldKey.currentContext!.findRenderObject() as RenderBox;
+    final position = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+
+    _removeOverlay();
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => GestureDetector(
+        onTap: _removeOverlay,
+        child: Container(
+          color: Colors.transparent,
+          child: Stack(
+            children: [
+              Positioned(
+                left: position.dx,
+                bottom: MediaQuery.of(context).size.height - position.dy + 8,
+                width: size.width,
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(8),
+                  child: SlashPromptSheet(
+                    prompts: prompts,
+                    keyword: keyword,
+                    onPromptSelected: (prompt) {
+                      _removeOverlay();
+                      _handlePromptSelected(prompt);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _handlePromptSelected(Prompt selectedPrompt) async {
+    if (mounted) {
+      
+      final fullMessage = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        builder: (_) => UsePromptBottomSheet(
+          title: selectedPrompt.title,
+          prompt: selectedPrompt.content,
+          username: selectedPrompt.userName,
+          description: selectedPrompt.description,
+          category: selectedPrompt.category,
+          onSend: (fullMessage) {
+            
+            Navigator.of(context).pop(fullMessage);
+          },
+        ),
+      );
+
+
+      if (fullMessage != null && fullMessage.trim().isNotEmpty && mounted) {
+        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+        chatProvider.sendMessage(
+          message: fullMessage,
+          assistantId: _currentAssistant!.id,
+          assistantName: _currentAssistant!.name,
+        );
+        _messageController.clear();
+        
+      } else {
+        debugPrint('ChatPage: Slash message not sent - null, empty, or not mounted');
+      }
+    }
+  }
+
+  void _handleSlashCommand() async {
+    final text = _messageController.text;
+
+    final slashIndex = text.lastIndexOf('/');
+    if (slashIndex == -1) {
+      _removeOverlay();
+      return;
+    }
+
+    final keyword = text.substring(slashIndex + 1).trim().toLowerCase();
+
+    if (keyword.isEmpty) {
+      _removeOverlay();
+      return;
+    }
+
+    final promptProvider = Provider.of<PromptProvider>(context, listen: false);
+    if (_cachedPrompts.isEmpty) {
+      _isPromptSelectorOpen = true;
+
+      final promptProvider = Provider.of<PromptProvider>(context, listen: false);
+      try {
+        
+        await promptProvider.loadPrompts(isPublic: true);
+        _cachedPrompts = promptProvider.publicPrompts;
+        
+      } catch (e) {
+        debugPrint('ChatPage: Failed to load prompts: $e');
+        _removeOverlay();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to load prompts: $e')),
+          );
+        }
+        return;
+      }
+    }
+    final matchingPrompts = _cachedPrompts.where((prompt) {
+    final titleMatch = prompt.title.toLowerCase().contains(keyword);
+    final descMatch = prompt.description.toLowerCase().contains(keyword);
+    return titleMatch || descMatch;
+    }).toList();
+
+    _showPromptDropdown(matchingPrompts, keyword);
+  }
+ 
   void onSendMessage() {
     if (_messageController.text.trim().isEmpty) return;
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
@@ -65,14 +209,14 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void openPromptLibraryPage() async {
-    debugPrint('ChatPage: Opening prompt library');
+    
     final selectedPrompt = await Navigator.push<Prompt>(
       context,
       MaterialPageRoute(
         builder: (context) => const PromptLibraryPage(),
       ),
     );
-    debugPrint('ChatPage: Selected prompt: ${selectedPrompt?.title}');
+    
     if (selectedPrompt != null) {
       final fullMessage = await showModalBottomSheet<String>(
         context: context,
@@ -90,7 +234,7 @@ class _ChatPageState extends State<ChatPage> {
           );
         },
       );
-      debugPrint('ChatPage: Bottom sheet returned message: $fullMessage');
+      
       if (fullMessage != null && fullMessage.isNotEmpty) {
         setState(() {
           _messageController.text = fullMessage;
@@ -239,6 +383,7 @@ class _ChatPageState extends State<ChatPage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: TextField(
+            key: _textFieldKey,
             controller: _messageController,
             decoration: InputDecoration(
               hintText: "Ask me anything, press '/' for prompts...",

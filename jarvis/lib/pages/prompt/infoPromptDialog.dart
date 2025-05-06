@@ -10,12 +10,14 @@ class InfoPromptDialog extends StatefulWidget {
   final Prompt prompt;
   final PromptApiService apiService;
   final VoidCallback onFavoriteToggled;
+  final Function(Prompt) onPromptSelected;
 
   const InfoPromptDialog({
     super.key,
     required this.prompt,
     required this.apiService,
     required this.onFavoriteToggled,
+    required this.onPromptSelected
   });
 
   @override
@@ -55,20 +57,8 @@ class _InfoPromptDialogState extends State<InfoPromptDialog> {
   }
 
   void _usePrompt() {
-    Navigator.of(context).pop();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return UsePromptBottomSheet(
-          title: widget.prompt.title,
-          prompt: widget.prompt.content,
-          username: widget.prompt.userName,
-          description: widget.prompt.description,
-          category: widget.prompt.category,
-        );
-      },
-    );
+    widget.onPromptSelected(widget.prompt);
+    Navigator.of(context).pop(widget.prompt);
   }
 
   @override

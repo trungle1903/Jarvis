@@ -111,6 +111,9 @@ class _PromptListWidgetState extends State<PromptListWidget> {
                         prompt: prompt,
                         apiService: widget.apiService,
                         onFavoriteToggled: widget.onReload,
+                        onPromptSelected: (prompt) {
+                          widget.onPromptSelected(prompt);
+                        },
                       ),
                     );
                   },
@@ -118,21 +121,10 @@ class _PromptListWidgetState extends State<PromptListWidget> {
               ],
               IconButton(
                 icon: Icon(Icons.arrow_forward, color: jvBlue),
-                onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    return UsePromptBottomSheet(
-                      title: prompt.title, 
-                      prompt: prompt.content,
-                      username: prompt.userName, 
-                      description: prompt.description, 
-                      category: prompt.category,
-                    );
+                  onPressed: () {
+                    debugPrint('PromptList: Selecting prompt: ${prompt.title}');
+                    widget.onPromptSelected(prompt);
                   },
-                );
-                },
               ),
             ],
            )

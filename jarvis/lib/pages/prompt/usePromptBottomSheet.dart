@@ -4,12 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/constants/colors.dart';
 
-class UsePromptBottomSheet extends StatelessWidget {
+class UsePromptBottomSheet extends StatefulWidget {
   final String title;
   final String prompt;
   final String username;
   final String description;
   final String category;
+  final void Function(String promptMessage) onSend;
   
   const UsePromptBottomSheet({
     required this.title,
@@ -17,13 +18,45 @@ class UsePromptBottomSheet extends StatelessWidget {
     required this.username,
     required this.description,
     required this.category,
+    required this.onSend,
+    super.key
   });
+
+  @override
+  State<UsePromptBottomSheet> createState() => _UsePromptBottomSheetState();
+}
+
+class _UsePromptBottomSheetState extends State<UsePromptBottomSheet> {
+
+  late final TextEditingController _inputController;
+
+  @override
+  void initState() {
+    super.initState();
+    _inputController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _inputController.dispose();
+    super.dispose();
+  }
+
   String get author {
-    final parts = username.split('@');
-    return parts.isNotEmpty ? parts[0] : username;
+    final parts = widget.username.split('@');
+    return parts.isNotEmpty ? parts[0] : widget.username;
   }
   void _copyToClipboard() {
-    Clipboard.setData(ClipboardData(text: prompt));
+    Clipboard.setData(ClipboardData(text: widget.prompt));
+  }
+
+  void _handleSend() {
+    final userInput = _inputController.text.trim();
+    final promptMessage = userInput.isNotEmpty
+      ? "${widget.prompt}\n\n input is: $userInput"
+      : widget.prompt;
+    widget.onSend(promptMessage);
+    print('Sending prompt message: $promptMessage');
   }
 
   @override
@@ -44,7 +77,7 @@ class UsePromptBottomSheet extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    title,
+                    widget.title,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                 ),
@@ -58,18 +91,18 @@ class UsePromptBottomSheet extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  "$category • by $author",
+                  "${widget.category} • by $author",
                   style: TextStyle(color: jvSubText),
                 ),
               ],
             ),
             SizedBox(height: 8,),
-            if (description.isNotEmpty)
+            if (widget.description.isNotEmpty)
             Row(
               children: [
                 Flexible(
                   child: Text(
-                    prompt,
+                    widget.description,
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                     softWrap: true,
                     overflow: TextOverflow.visible,
@@ -94,7 +127,7 @@ class UsePromptBottomSheet extends StatelessWidget {
               TextField(
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: prompt,
+                  hintText: widget.prompt,
                   border: OutlineInputBorder(),
                 ),
                 readOnly: true
@@ -111,6 +144,7 @@ class UsePromptBottomSheet extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: _inputController,
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: "Write something here...",
@@ -122,7 +156,7 @@ class UsePromptBottomSheet extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: GradientElevatedButton(
-                onPressed: () {},
+                onPressed: _handleSend,
                 text: "Send",
               ),
             )

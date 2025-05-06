@@ -6,8 +6,10 @@ import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/models/bot.dart';
+import 'package:jarvis/models/prompt.dart';
 import 'package:jarvis/pages/assistants/create_assistant_dialog.dart';
 import 'package:jarvis/pages/prompt/prompt_library.dart';
+import 'package:jarvis/pages/prompt/usePromptBottomSheet.dart';
 import 'package:jarvis/providers/chat_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -62,9 +64,48 @@ class _ChatPageState extends State<ChatPage> {
     _scaffoldKey.currentState?.openEndDrawer();
   }
 
-  void openPromptLibraryDrawer() {
-    setState(() => _isPromptLibraryOpen = true);
-    _scaffoldKey.currentState?.openEndDrawer();
+  void openPromptLibraryPage() async {
+    debugPrint('ChatPage: Opening prompt library');
+    final selectedPrompt = await Navigator.push<Prompt>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PromptLibraryPage(),
+      ),
+    );
+    debugPrint('ChatPage: Selected prompt: ${selectedPrompt?.title}');
+    if (selectedPrompt != null) {
+      final fullMessage = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return UsePromptBottomSheet(
+            title: selectedPrompt.title,
+            prompt: selectedPrompt.content,
+            username: selectedPrompt.userName,
+            description: selectedPrompt.description,
+            category: selectedPrompt.category,
+            onSend: (fullMessage) {
+              Navigator.of(context).pop(fullMessage);
+            },
+          );
+        },
+      );
+      debugPrint('ChatPage: Bottom sheet returned message: $fullMessage');
+      if (fullMessage != null && fullMessage.isNotEmpty) {
+        setState(() {
+          _messageController.text = fullMessage;
+        });
+
+      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+      chatProvider.sendMessage(
+        message: fullMessage,
+        assistantId: _currentAssistant!.id,
+        assistantName: _currentAssistant!.name,
+      );
+      _messageController.clear();
+      print('ChatPage: Sending Prompt message: $fullMessage');
+      }
+    }
   }
 
   void _handleModelChange(Bot newAssistant) {
@@ -217,7 +258,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.library_books, color: Colors.grey),
-                    onPressed: openPromptLibraryDrawer,
+                    onPressed: openPromptLibraryPage,
                   ),
                 ],
               ),

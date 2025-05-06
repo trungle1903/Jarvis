@@ -5,7 +5,6 @@ import 'package:jarvis/pages/prompt/emptyPrompt.dart';
 import 'package:jarvis/pages/prompt/promptList.dart';
 import 'package:jarvis/pages/prompt/tabButton.dart';
 import 'package:jarvis/providers/prompt_provider.dart';
-import 'package:jarvis/services/api/prompt_api_service.dart';
 import 'package:provider/provider.dart';
 
 class PromptLibraryPage extends StatefulWidget {
@@ -82,17 +81,15 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
       ? promptProvider.publicPrompts
       : promptProvider.myPrompts;
 
-    return Drawer(
-      backgroundColor: Colors.white,
-      width: MediaQuery.of(context).size.width * 0.9,
-      child: Column(
-        children: [
+    return Scaffold(
+      appBar: 
           AppBar(
             title: const Text(
               "Prompt Library",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             automaticallyImplyLeading: false,
+            backgroundColor: Colors.white,
             actions: [
               IconButton(
                 icon: const Icon(Icons.add, color: Colors.blue),
@@ -104,7 +101,8 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
               ),
             ],
           ),
-
+          backgroundColor: Colors.white,
+          body: Column(children: [
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: Row(
@@ -208,6 +206,7 @@ class _PromptLibraryPageState extends State<PromptLibraryPage> {
                 : PromptListWidget(
                     prompts: prompts,
                     onPromptSelected: (prompt) {
+                      debugPrint('PromptLibrary: Selected prompt: ${prompt.title}');
                       Navigator.pop(context, prompt);
                     },
                     onFavoriteToggled: (promptId) {},

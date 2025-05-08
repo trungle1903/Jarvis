@@ -17,17 +17,28 @@ class AuthApiService {
 
   AuthApiService(this._headerService, this._dio);
   Future<User> login(String email, String password) async {
-    final response = await _dio.post(
-      '$baseUrl/api/v1/auth/password/sign-in',
-      data: {'email': email, 'password': password},
-      options: Options(headers: _headerService.baseHeaders),
-    );
-    final loginData = response.data;
-    final token = loginData['access_token'];
-    final refreshToken = loginData['refresh_token'];
+    try {
+      final response = await _dio.post(
+        '$baseUrl/api/v1/auth/password/sign-in',
+        data: {'email': email, 'password': password},
+        options: Options(headers: _headerService.baseHeaders),
+      );
+      final loginData = response.data;
+      final token = loginData['access_token'];
+      final refreshToken = loginData['refresh_token'];
 
-    final user = await fetchUserProfile(token, refreshToken);
-    return user;
+      final user = await fetchUserProfile(token, refreshToken);
+      return user;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null) {
+        final errorMessage = e.response?.data['error'] ?? 'Login failed';
+        throw Exception(errorMessage);
+      } else {
+        throw Exception('Network error, please try again.');
+      }
+    } catch (e) {
+      throw Exception('Something went wrong. Please try again later.');
+    }
   }
 
   Future<User> register(String email, String password) async {
@@ -42,15 +53,15 @@ class AuthApiService {
         options: Options(headers: _headerService.baseHeaders),
       );
       if (response.statusCode != 200) {
-        final errorMessage = response.data['message'] ?? 'Invalid request';
-        throw AuthException(errorMessage);
+        final errorMessage = response.data['error'] ?? 'Invalid request';
+        throw Exception(errorMessage);
       }
       return User.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode != 200) {
         final errorData = e.response?.data;
-        throw AuthException(
-          errorData['message'] ?? 'Invalid email or password',
+        throw Exception(
+          errorData['error'] ?? 'Invalid email or password',
         );
       }
       rethrow;
@@ -142,12 +153,4 @@ class AuthApiService {
       throw Exception('Failed to fetch user profile: $e');
     }
   }
-}
-
-class AuthException implements Exception {
-  final String message;
-  AuthException(this.message);
-
-  @override
-  String toString() => message;
 }

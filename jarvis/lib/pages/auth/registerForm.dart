@@ -122,7 +122,11 @@ class _RegisterFormState extends State<RegisterForm> {
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'You have to enter your email.';
+                    return 'Please enter your email';
+                  }
+                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  if (!emailRegex.hasMatch(value)) {
+                    return 'Please enter a valid email address';
                   }
                   return null;
                 },

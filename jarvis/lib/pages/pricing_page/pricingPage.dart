@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/pricing_page/pricing_plan_card.dart';
-
+import 'package:jarvis/services/ad_manager.dart';
+import 'package:flutter/foundation.dart';
 class PricingPage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
@@ -73,8 +74,8 @@ class PricingPage extends StatelessWidget {
                       {'text': 'Ai Action Injection'},
                       {'text': 'Select Text for AI Action'},
                     ],
-                    buttonText: 'Sign up to subscribe',
-                    onPressed: () {},
+                    buttonText: 'Subscribe Now',
+                    onPressed: () {if (!kIsWeb) {AdManager.showInterstitialAd(context);}},
                     buttonTextColor: jvDeepBlue,
                     buttonBgColor: jvGrey,
                   ),

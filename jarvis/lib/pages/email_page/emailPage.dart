@@ -5,6 +5,8 @@ import 'package:jarvis/components/messageTile.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/models/bot.dart';
 import 'package:jarvis/pages/email_page/emailOptions.dart';
+import 'package:jarvis/providers/email_provider.dart';
+import 'package:provider/provider.dart';
 
 class EmailPage extends StatefulWidget {
   const EmailPage({super.key});
@@ -14,57 +16,11 @@ class EmailPage extends StatefulWidget {
 }
 
 class _EmailPageState extends State<EmailPage> {
-  final List<MessageTile> _messages = [];
   final TextEditingController _messageController = TextEditingController();
-  final List<Bot> _aiModels = [
-    Bot(id: 'gemini', name: 'Gemini 1.5 Flash', model: 'gemini'),
-    Bot(id: 'gpt-4', name: 'Chat GPT 4o', model: 'gpt-4'),
-  ];
-  late Bot _currentAssistant;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentAssistant = _aiModels[1]; // Default to GPT
-  }
-
-  void _sendMessage(String message) {
-    if (message.trim().isEmpty) return;
-
-    setState(() {
-      _messages.add(MessageTile(isAI: false, message: message));
-      _messages.add(
-        MessageTile(
-          isAI: true,
-          message:
-              "Here's your generated email...", // Replace with actual API response
-          aiLogo: _getAssistantLogo(_currentAssistant.model),
-          aiName: _currentAssistant.name,
-        ),
-      );
-      _messageController.clear();
-    });
-  }
-
-  String _getAssistantLogo(String model) {
-    switch (model) {
-      case 'gemini':
-        return 'assets/logos/gemini.png';
-      case 'gpt-4':
-        return 'assets/logos/gpt.png';
-      default:
-        return 'assets/logos/default_ai.png';
-    }
-  }
-
-  void _handleModelChange(Bot newAssistant) {
-    setState(() {
-      _currentAssistant = newAssistant;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    final emailProvider = Provider.of<EmailProvider>(context);
     return Scaffold(
       drawer: const SideBar(selectedIndex: 3),
       appBar: AppBar(
@@ -80,7 +36,7 @@ class _EmailPageState extends State<EmailPage> {
         children: [
           Expanded(
             child:
-                _messages.isEmpty
+                emailProvider.messages.isEmpty
                     ? const Center(
                       child: Text(
                         "Start generating emails...",
@@ -89,17 +45,17 @@ class _EmailPageState extends State<EmailPage> {
                     )
                     : ListView.builder(
                       padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: _messages.length,
-                      itemBuilder: (context, index) => _messages[index],
+                      itemCount: emailProvider.messages.length,
+                      itemBuilder: (context, index) => emailProvider.messages[index],
                     ),
           ),
-          _buildInputSection(),
+          _buildInputSection(emailProvider),
         ],
       ),
     );
   }
 
-  Widget _buildInputSection() {
+  Widget _buildInputSection(EmailProvider emailProvider) {
     return Column(
       children: [
         Padding(
@@ -109,15 +65,15 @@ class _EmailPageState extends State<EmailPage> {
               Expanded(
                 child: EmailOptions(
                   onOptionSelected: (option) {
-                    _sendMessage("Generate email about $option");
+                    emailProvider.sendMessage("Generate email about $option");
                   },
                 ),
               ),
               const SizedBox(width: 10),
               DropdownAI(
-                assistants: _aiModels,
-                currentAssistant: _currentAssistant,
-                onChange: _handleModelChange,
+                assistants: emailProvider.aiModels,
+                currentAssistant: emailProvider.currentAssistant,
+                onChange: emailProvider.handleModelChange,
                 showText: false,
               ),
             ],
@@ -139,10 +95,21 @@ class _EmailPageState extends State<EmailPage> {
               prefixIcon: const Icon(Icons.email, color: Colors.grey),
               suffixIcon: IconButton(
                 icon: const Icon(Icons.send, color: jvBlue),
-                onPressed: () => _sendMessage(_messageController.text),
+                onPressed: () {
+                  final message = _messageController.text;
+                  if (message.trim().isNotEmpty) {
+                    emailProvider.sendMessage(message);
+                    _messageController.clear();
+                  }
+                },
               ),
             ),
-            onSubmitted: _sendMessage,
+            onSubmitted: (value) {
+              if (value.trim().isNotEmpty) {
+                emailProvider.sendMessage(value);
+                _messageController.clear();
+              }
+            },
           ),
         ),
         const SizedBox(height: 20),

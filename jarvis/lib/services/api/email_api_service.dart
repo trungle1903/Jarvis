@@ -6,35 +6,41 @@ import 'package:jarvis/services/storage.dart';
 class EmailApiService {
   final Dio _dio;
   final HeaderService _headerService;
-  String baseUrl = dotenv.get('APP_API_BASE_URL');
-  String guid = dotenv.get('EMAIL_X_JARVIS_GUID');
+  final String baseUrl = dotenv.get('APP_API_BASE_URL');
+  final String guid = dotenv.get('EMAIL_X_JARVIS_GUID');
 
   EmailApiService({required Dio dio, required HeaderService headerService})
-    : _dio = dio,
-      _headerService = headerService;
+      : _dio = dio,
+        _headerService = headerService;
 
-  Future<String> generateEmail(String mainIdea) async {
+  Future<Map<String, dynamic>> generateEmail({
+    required String subject,
+    required String sender,
+    required String receiver,
+    required String language,
+    required String mainIdea,
+    required String action,
+    required String emailContent,
+    required Map<String, String> style,
+  }) async {
     try {
       final accessToken = await StorageService().readSecureData('access_token');
-      final response = await _dio.post(
-        '$baseUrl/api/v1/ai-email', 
-        data: {
-          "mainIdea": mainIdea,
-          "action": "Reply to this email",
-          "email": "Các bạn sinh viên thân mến, Trung tâm Hỗ trợ Sinh viên giới thiệu tới các bạn “Ngày Hội Sinh viên và Doanh nghiệp - Năm 2024",
-          "metadata": {
-            "context": [],
-            "subject": "Generated Email",
-            "sender": "user@example.com",
-            "receiver": "recipient@example.com",
-            "style": {
-              "length": "medium",
-              "formality": "neutral",
-              "tone": "friendly"
-            },
-            "language": "english"
-          }
+      final emailData = {
+        "mainIdea": mainIdea,
+        "action": action,
+        "email": emailContent,
+        "metadata": {
+          "context": [],
+          "subject": subject,
+          "sender": sender,
+          "receiver": receiver,
+          "style": style,
+          "language": language,
         },
+      };
+      final response = await _dio.post(
+        '$baseUrl/api/v1/ai-email',
+        data: emailData,
         options: Options(
           headers: {
             'x-jarvis-guid': guid,
@@ -44,17 +50,55 @@ class EmailApiService {
       );
 
       if (response.statusCode == 200) {
-        print(response.data);
-        return response.data.toString();
+        return {
+          'email': response.data['email']?.toString() ?? '',
+          'improvedActions': List<String>.from(response.data['improvedActions'] ?? []),
+          'remainingUsage': response.data['remainingUsage']?.toString() ?? ''
+        };
       } else {
-        throw DioException(
-          requestOptions: response.requestOptions,
-          response: response,
-          error: 'Failed to generate email: ${response.statusMessage}',
-        );
+        throw Exception('Failed to generate email: ${response.statusMessage}');
       }
-    } on DioException catch (e) {
-      throw Exception('API error: ${e.message}');
+    } catch (e) {
+      throw Exception('API error: ${e.toString()}');
+    }
+  }
+
+  Future<List<String>> generateIdea({
+    required String subject,
+    required String sender,
+    required String receiver,
+    required String language,
+    required String emailContent,
+  }) async {
+    try {
+      final accessToken = await StorageService().readSecureData('access_token');
+      final response = await _dio.post(
+        '$baseUrl/api/v1/ai-email/reply-ideas',
+        data: {
+          "action": "Suggest 3 ideas for this email",
+          "email": emailContent,
+          "metadata": {
+            "context": [],
+            "subject": subject,
+            "sender": sender,
+            "receiver": receiver,
+            "language": language.toLowerCase(),
+          },
+        },
+        options: Options(
+          headers: {
+            'x-jarvis-guid': guid,
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        return List<String>.from(response.data['ideas']);
+      } else {
+        throw Exception('Failed to generate ideas: ${response.statusMessage}');
+      }
+    } catch (e) {
+      throw Exception('API error: ${e.toString()}');
     }
   }
 }

@@ -108,7 +108,7 @@ class _EmailPageState extends State<EmailPage> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.local_fire_department, color: Colors.orange),
+              const Icon(Icons.local_fire_department, color: jvDeepBlue),
               const SizedBox(width: 4),
               Text(
                 emailProvider.getEmailToken(),

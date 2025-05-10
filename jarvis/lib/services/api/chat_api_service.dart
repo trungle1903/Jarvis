@@ -21,6 +21,7 @@ class ChatApiService {
     String? conversationId,
     required String assistantId,
     required String assistantName,
+    required String assistantModel,
     List<dynamic> files = const [],
   }) async {
     try {
@@ -40,7 +41,7 @@ class ChatApiService {
                 'content': message,
                 'files': files,
                 'assistant': {
-                  'model': 'dify',
+                  'model': assistantModel,
                   'name': assistantName,
                   'id': assistantId,
                 },
@@ -49,7 +50,7 @@ class ChatApiService {
                 "role": "model",
                 "content": "Hello! How can I assist you today?",
                 "assistant": {
-                  "model": "dify",
+                  "model": assistantModel,
                   "name": assistantName,
                   "id": assistantId,
                 },
@@ -60,7 +61,7 @@ class ChatApiService {
           },
         },
         'assistant': {
-          'model': 'dify',
+          'model': assistantModel,
           'name': assistantName,
           'id': assistantId,
         },

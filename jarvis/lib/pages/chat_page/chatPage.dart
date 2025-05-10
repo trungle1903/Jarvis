@@ -10,6 +10,7 @@ import 'package:jarvis/models/prompt.dart';
 import 'package:jarvis/pages/assistants/create_assistant_dialog.dart';
 import 'package:jarvis/pages/prompt/prompt_library.dart';
 import 'package:jarvis/pages/prompt/usePromptBottomSheet.dart';
+import 'package:jarvis/providers/assistants_provider.dart';
 import 'package:jarvis/providers/chat_provider.dart';
 import 'package:jarvis/providers/prompt_provider.dart';
 import 'package:provider/provider.dart';
@@ -33,12 +34,23 @@ class _ChatPageState extends State<ChatPage> {
   OverlayEntry? _overlayEntry;
   bool _isPromptSelectorOpen = false;
   List<Prompt> _cachedPrompts = [];
+  bool _isLoadingAssistants = false;
 
   @override
   void initState() {
     super.initState();
     _messageController.addListener(_handleSlashCommand);
-    _loadAssistants();
+    _availableAssistants = [
+      Bot(id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash', model: 'dify'),
+      Bot(id: 'gemini-1.5-pro-latest', name: 'Gemini 1.5 Pro', model: 'dify'),
+      Bot(id: 'gpt-4o', name: 'Chat GPT 4o', model: 'dify'),
+      Bot(id: 'gpt-4o-mini', name: 'Chat GPT 4o-mini', model: 'dify'),
+    ];
+    _currentAssistant = widget.assistant ?? _availableAssistants.first;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadAssistants();
+    });
   }
 
   @override
@@ -50,18 +62,37 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _loadAssistants() async {
+    final assistantProvider = Provider.of<AssistantProvider>(context, listen: false);
+
     setState(() {
-      _availableAssistants = [
-        Bot(
-          id: 'gemini-1.5-flash-latest',
-          name: 'Gemini 1.5 Flash',
-          model: 'dify',
-        ),
-        Bot(id: 'gpt-4o-mini', name: 'Chat GPT 4o', model: 'dify'),
-        if (widget.assistant != null) widget.assistant!,
-      ];
-      _currentAssistant = widget.assistant ?? _availableAssistants.first;
+      _isLoadingAssistants = true;
     });
+
+    try {
+      await assistantProvider.fetchAssistants();
+      final fetchedAssistants = assistantProvider.assistants;
+
+      setState(() {
+        final fetchedBots = fetchedAssistants.map((assistant) => Bot(id: assistant.id, name: assistant.assistantName, model: 'knowledge-base')).toList();
+        _availableAssistants = [
+            ..._availableAssistants,
+            ...fetchedBots];
+          if (widget.assistant != null &&
+              !_availableAssistants.any((bot) => bot.id == widget.assistant!.id)) {
+            _availableAssistants.add(widget.assistant!);
+          }
+
+          _currentAssistant = _availableAssistants.firstWhere(
+            (bot) => bot.id == (_currentAssistant?.id ?? widget.assistant?.id ?? _availableAssistants.first.id),
+            orElse: () => _availableAssistants.first,
+          );
+        });
+    } catch (e) {
+      print('Error loading assistants: $e');
+      setState(() {
+        
+      });
+    }
   }
   void _removeOverlay() {
     _overlayEntry?.remove();
@@ -137,6 +168,7 @@ class _ChatPageState extends State<ChatPage> {
           message: fullMessage,
           assistantId: _currentAssistant!.id,
           assistantName: _currentAssistant!.name,
+          assistantModel: _currentAssistant!.model
         );
         _messageController.clear();
         
@@ -199,6 +231,7 @@ class _ChatPageState extends State<ChatPage> {
       message: _messageController.text,
       assistantId: _currentAssistant!.id,
       assistantName: _currentAssistant!.name,
+      assistantModel: _currentAssistant!.model
     );
     _messageController.clear();
   }
@@ -245,6 +278,7 @@ class _ChatPageState extends State<ChatPage> {
         message: fullMessage,
         assistantId: _currentAssistant!.id,
         assistantName: _currentAssistant!.name,
+        assistantModel: _currentAssistant!.model
       );
       _messageController.clear();
       print('ChatPage: Sending Prompt message: $fullMessage');
@@ -261,11 +295,15 @@ class _ChatPageState extends State<ChatPage> {
   String _getAssistantLogo(String? model) {
     switch (model) {
       case 'gemini-1.5-flash-latest':
-        return 'assets/logos/gemini.png';
+        return 'logos/gemini-flash.png';
+      case 'gemini-1.5-pro-latest':
+        return 'logos/gemini-pro.png';
+      case 'gpt-4o':
+        return 'logos/gpt.jpg';
       case 'gpt-4o-mini':
-        return 'assets/logos/gpt.png';
+        return 'logos/gpt-mini.png';
       default:
-        return 'assets/logos/default_ai.png';
+        return 'logos/default_ai.png';
     }
   }
 
@@ -368,16 +406,38 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ],
               ),
-              IconButton(
-                onPressed: () {
-                  Provider.of<ChatProvider>(
-                    context,
-                    listen: false,
-                  ).clearConversation();
-                },
-                icon: const Icon(Icons.message, color: jvBlue),
-              ),
-            ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Provider.of<ChatProvider>(
+                        context,
+                        listen: false,
+                      ).clearConversation();
+                    },
+                    icon: const Icon(Icons.message, color: jvBlue),
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.local_fire_department, color: jvBlue),
+                      const SizedBox(width: 4),
+                      Text(
+                        Provider.of<ChatProvider>(
+                          context,
+                          listen: false,
+                        ).token,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              )
+            ]
           ),
         ),
         Padding(

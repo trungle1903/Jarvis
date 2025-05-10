@@ -12,6 +12,7 @@ class ChatProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   String? _conversationId;
+  int? _remainingUsage = 30;
 
   ChatProvider(this._apiService);
 
@@ -20,6 +21,7 @@ class ChatProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get conversationId => _conversationId;
+  String get token => _remainingUsage.toString();
 
   Future<void> sendMessage({
     required String message,
@@ -27,6 +29,7 @@ class ChatProvider with ChangeNotifier {
     required String assistantName,
     String? conversationId,
     List<dynamic> files = const [],
+    required String assistantModel
   }) async {
     _isLoading = true;
     _error = null;
@@ -54,8 +57,9 @@ class ChatProvider with ChangeNotifier {
         assistantId: assistantId,
         assistantName: assistantName,
         files: files,
+        assistantModel: assistantModel
       );
-
+      _remainingUsage = response.remainingUsage;
       _conversationId ??= response.conversationId;
       _messages.add(
         ChatMessage(

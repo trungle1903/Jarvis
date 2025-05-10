@@ -53,11 +53,11 @@ class KnowledgeSourceDialog extends StatelessWidget {
                             ),
                         onTap: () {
                           if (source["title"] == "Local files") {
+                            Navigator.pop(context);
                             showDialog(
                               context: context,
                               builder: (context) => LocalFileUploadDialog(knowledgeBaseId: knowledgeBaseId),
                             );
-                            Navigator.pop(context);
                           } else {
                           }
                         },

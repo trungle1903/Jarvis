@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/constants/colors.dart';
@@ -95,6 +96,8 @@ class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
                               ),
                             ),
                             onChanged: (value) {
+                              Provider.of<KnowledgeBaseProvider>(context, listen: false)
+                                  .searchUnits(value);
                             },
                           ),
                         ),
@@ -136,25 +139,53 @@ class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
                           itemCount: units.length,
                           itemBuilder: (context, index) {
                             final unit = units[index];
-                            return Card(
+                            return Card.outlined(
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                side: const BorderSide(color: jvBlue),
+                              ),
                               margin: const EdgeInsets.symmetric(vertical: 8),
                               child: ListTile(
                                 leading: Icon(_getIconForUnitType(unit.type), color: jvDeepBlue),
-                                title: Text(unit.name),
-                                subtitle: Text("${unit.size} KB"),
+                                title: Text(unit.name, style: TextStyle(fontWeight: FontWeight.bold),),
+                                subtitle: Text("${unit.size.toStringAsFixed(2)} KB", style: TextStyle(fontSize: 12, color: Colors.grey),),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Switch(
+                                      activeColor: jvBlue,
                                       value: unit.enabled,
                                       onChanged: (value) {
+                                        provider.toggleUnitEnabled(widget.knowledgeBaseId, unit.id, value);
                                       },
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () {
-                                        // Delete unit
-                                      },
+                                      onPressed: ()  async {
+                                        final confirm = await showDialog<bool>(
+                                          context: context,
+                                          builder: 
+                                            (context) => AlertDialog(
+                                              title: Text('Delete Knowledge Base'),
+                                              content: Text('Are you sure you want to delete this unit?'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(context, false), 
+                                                  child: Text('Cancel')
+                                                ),
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(context, true), 
+                                                  child: Text('Delete')
+                                                )
+                                              ],
+                                            )
+                                        );
+                                        if (confirm == true) {
+                                        await provider.deleteUnit(widget.knowledgeBaseId, unit.id);
+                                        provider.fetchKnowledgeUnits(widget.knowledgeBaseId);
+                                      }
+                                    },
                                     ),
                                   ],
                                 ),

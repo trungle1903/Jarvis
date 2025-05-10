@@ -190,4 +190,35 @@ class KnowledgeBaseProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void searchUnits(String query) {
+    final originalUnits = _units;
+    _units = originalUnits
+        .where((unit) => unit.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    notifyListeners();
+  }
+
+  Future<void> toggleUnitEnabled(String knowledgeId, String unitId, bool enabled) async {
+    try {
+      await _apiService.updateUnit(knowledgeId, unitId, enabled);
+      final unit = _units.firstWhere((u) => u.id == unitId);
+      unit.enabled = enabled;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Failed to update unit: $e';
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteUnit(String knowledgeId, String unitId) async {
+    try {
+      await _apiService.deleteUnit(knowledgeId, unitId);
+      _units.removeWhere((u) => u.id == unitId);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Failed to delete unit: $e';
+      notifyListeners();
+    }
+  }
 }

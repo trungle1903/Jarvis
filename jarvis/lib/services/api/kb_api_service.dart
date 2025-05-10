@@ -324,4 +324,57 @@ class KnowledgeBaseApiService {
       throw Exception('Failed to link local file');
     }
   }
+
+  Future<void> updateUnit(String knowledgeId, String unitId, bool enabled) async {
+    try {
+      final accessToken = await StorageService().readSecureData('access_token');
+      if (accessToken == null) {
+        throw Exception('Access token is missing');
+      }
+
+      final response = await _dio.patch(
+        '$baseUrl/kb-core/v1/knowledge/$knowledgeId/datasources/$unitId',
+        data: {'status': enabled},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'x-jarvis-guid': guid,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to update unit: ${response.statusCode} ${response.data}');
+      }
+    } catch (e) {
+      print('Error in updateUnit: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteUnit(String knowledgebaseId, String unitId) async {
+    try {
+      final accessToken = await StorageService().readSecureData('access_token');
+      if (accessToken == null) {
+        throw Exception('Access token is missing');
+      }
+
+      final response = await _dio.delete(
+        '$baseUrl/kb-core/v1/knowledge/$knowledgebaseId/datasources/$unitId',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'x-jarvis-guid': guid,
+          },
+        ),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to delete unit: ${response.statusCode} ${response.data}');
+      }
+    } catch (e) {
+      print('Error in deleteUnit: $e');
+      rethrow;
+    }
+  }
 }

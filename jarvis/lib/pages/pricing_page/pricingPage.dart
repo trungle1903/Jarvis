@@ -4,6 +4,8 @@ import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/pricing_page/pricing_plan_card.dart';
 import 'package:jarvis/services/ad_manager.dart';
 import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 class PricingPage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
@@ -75,7 +77,14 @@ class PricingPage extends StatelessWidget {
                       {'text': 'Select Text for AI Action'},
                     ],
                     buttonText: 'Subscribe Now',
-                    onPressed: () {if (!kIsWeb) {AdManager.showInterstitialAd(context);}},
+                    onPressed: () async {
+                      const url = 'https://dev.jarvis.cx/pricing';
+                      if (await canLaunchUrl(Uri.parse(url))) {
+                        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                      } else {
+                        throw 'Could not launch $url';
+                      }
+                    },
                     buttonTextColor: jvDeepBlue,
                     buttonBgColor: jvGrey,
                   ),
@@ -91,8 +100,8 @@ class PricingPage extends StatelessWidget {
                       {'text': 'AI Action Injection'},
                       {'text': 'Select Text for AI Action'},
                     ],
-                    buttonText: 'Sign up to subscribe',
-                    onPressed: () {},
+                    buttonText: 'Subscribe Now',
+                    onPressed: () {if (!kIsWeb) {AdManager.showInterstitialAd(context);}},
                     buttonTextColor: Colors.white,
                     buttonBgColor: jvBlue,
                   ),
@@ -108,7 +117,7 @@ class PricingPage extends StatelessWidget {
                       {'text': 'AI Action Injection'},
                       {'text': 'Select Text for AI Action'},
                     ],
-                    buttonText: 'Sign up to subscribe',
+                    buttonText: 'Subscribe Now',
                     onPressed: () {},
                     buttonTextColor: Colors.white,
                     buttonBgColor: Colors.amber,

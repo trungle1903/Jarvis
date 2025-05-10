@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/pages/assistants/knowledge_soure.dart';
+import 'package:jarvis/pages/knowledge_base/knowledge_soure.dart';
 import 'package:jarvis/providers/assistants_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -145,7 +145,7 @@ class _CreateAssistantDialogState extends State<CreateAssistantDialog> {
                         onPressed: () {
                           showDialog(
                             context: context,
-                            builder: (context) => KnowledgeSourceDialog(),
+                            builder: (context) => KnowledgeSourceDialog(knowledgeBaseId: '',),
                           );
                         },
                         icon: Icon(Icons.add, color: jvDeepBlue),

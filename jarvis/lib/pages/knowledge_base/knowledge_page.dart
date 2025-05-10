@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
+import 'package:jarvis/models/unit.dart';
 import 'package:jarvis/pages/knowledge_base/create_kb_dialog.dart';
 import 'package:jarvis/pages/knowledge_base/edit_kb_dialog.dart';
+import 'package:jarvis/pages/knowledge_base/knowledge_unit.dart';
 import 'package:jarvis/providers/kb_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +31,33 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
   void _refreshKnowledgeBases() {
     Provider.of<KnowledgeBaseProvider>(context, listen: false).fetchKnowledges(
       query: _searchController.text,
+    );
+  }
+
+  void _openKnowledgeDrawer(BuildContext context, String id, String title, String description) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Knowledge Drawer',
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: KnowledgeUnitDrawer(
+            knowledgeBaseId: id,
+            title: title,
+            description: description,
+            onClose: () => Navigator.of(context).pop(),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween(begin: const Offset(1, 0), end: Offset.zero);
+        return SlideTransition(
+          position: tween.animate(animation),
+          child: child,
+        );
+      },
     );
   }
 
@@ -130,60 +159,65 @@ class _KnowledgeBasePageState extends State<KnowledgeBasePage> {
                         return Card.outlined(
                           margin: EdgeInsets.symmetric(vertical: 8),
                           color: Colors.white,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(kb.knowledgeName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),)
-                                    ),
-                                    Row(
-                                      children: [
-                                        IconButton(onPressed: () async {
-                                          final result = await showDialog(
-                                            context: context, 
-                                            builder: 
-                                              (context) => EditKnowledgeBaseDialog(knowledge: kb)
-                                          );
-                                          if (result) {_refreshKnowledgeBases();}
-                                        }, icon: Icon(Icons.edit), color: Colors.grey,),
-                                        IconButton(onPressed: () async {
-                                          final confirm = await showDialog<bool>(
-                                            context: context,
-                                            builder: 
-                                              (context) => AlertDialog(
-                                                title: Text('Delete Knowledge Base'),
-                                                content: Text('Are you sure you want to delete this Knowledge Base?'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () => Navigator.pop(context, false), 
-                                                    child: Text('Cancel')
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () => Navigator.pop(context, true), 
-                                                    child: Text('Delete')
-                                                  )
-                                                ],
-                                              )
-                                          );
-                                          if (confirm == true) {
-                                            await provider.api.deleteKnowledgeBase(kb.id);
-                                            _refreshKnowledgeBases();
-                                          }
-                                        }, icon: Icon(Icons.delete), color: Colors.red,)
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8,),
-                                Text(kb.description ?? 'No description available', style: TextStyle(color: Colors.grey),)
-                              ],
-                             ),
-                          ),
+                          child: InkWell(
+                            onTap: () {
+                              _openKnowledgeDrawer(context, kb.id, kb.knowledgeName, kb.description);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(kb.knowledgeName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),)
+                                      ),
+                                      Row(
+                                        children: [
+                                          IconButton(onPressed: () async {
+                                            final result = await showDialog(
+                                              context: context, 
+                                              builder: 
+                                                (context) => EditKnowledgeBaseDialog(knowledge: kb)
+                                            );
+                                            if (result) {_refreshKnowledgeBases();}
+                                          }, icon: Icon(Icons.edit), color: Colors.grey,),
+                                          IconButton(onPressed: () async {
+                                            final confirm = await showDialog<bool>(
+                                              context: context,
+                                              builder: 
+                                                (context) => AlertDialog(
+                                                  title: Text('Delete Knowledge Base'),
+                                                  content: Text('Are you sure you want to delete this Knowledge Base?'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () => Navigator.pop(context, false), 
+                                                      child: Text('Cancel')
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () => Navigator.pop(context, true), 
+                                                      child: Text('Delete')
+                                                    )
+                                                  ],
+                                                )
+                                            );
+                                            if (confirm == true) {
+                                              await provider.api.deleteKnowledgeBase(kb.id);
+                                              _refreshKnowledgeBases();
+                                            }
+                                          }, icon: Icon(Icons.delete), color: Colors.red,)
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8,),
+                                  Text(kb.description ?? 'No description available', style: TextStyle(color: Colors.grey),)
+                                ],
+                              ),
+                            ),
+                          )
                         );
                       }
                     );

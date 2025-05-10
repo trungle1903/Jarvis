@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/constants/colors.dart';
+import 'package:jarvis/pages/knowledge_base/local_file_upload_dialog.dart';
 
 class KnowledgeSourceDialog extends StatelessWidget {
+  final String knowledgeBaseId;
+
+  KnowledgeSourceDialog({required this.knowledgeBaseId});
   final List<Map<String, dynamic>> sources = [
     {"title": "Local files", "subtitle": "Upload pdf, docx, ...", "icon": Icons.insert_drive_file},
     {"title": "Website", "subtitle": "Connect Website to get data", "icon": Icons.language},
@@ -47,7 +51,16 @@ class KnowledgeSourceDialog extends StatelessWidget {
                               source["subtitle"],
                               style: TextStyle(color: Colors.grey),
                             ),
-                        onTap: () {},
+                        onTap: () {
+                          if (source["title"] == "Local files") {
+                            showDialog(
+                              context: context,
+                              builder: (context) => LocalFileUploadDialog(knowledgeBaseId: knowledgeBaseId),
+                            );
+                            Navigator.pop(context);
+                          } else {
+                          }
+                        },
                       );
                     }).toList(),
                   ),

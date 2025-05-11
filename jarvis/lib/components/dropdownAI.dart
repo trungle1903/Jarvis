@@ -43,15 +43,15 @@ class _DropdownAIState extends State<DropdownAI> {
   String _getLogoForModel(String model) {
     switch (model) {
       case 'gemini-1.5-flash-latest':
-        return 'logos/gemini-flash.png';
+        return 'assets/logos/gemini-flash.png';
       case 'gemini-1.5-pro-latest':
-        return 'logos/gemini-pro.png';
+        return 'assets/logos/gemini-pro.png';
       case 'gpt-4o':
-        return 'logos/gpt.jpg';
+        return 'assets/logos/gpt.jpg';
       case 'gpt-4o-mini':
-        return 'logos/gpt-mini.png';
+        return 'assets/logos/gpt-mini.png';
       default:
-        return 'logos/default_ai.png';
+        return 'assets/logos/default_ai.png';
     }
   }
 

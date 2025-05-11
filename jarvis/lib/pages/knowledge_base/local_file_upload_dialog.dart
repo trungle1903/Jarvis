@@ -45,11 +45,9 @@ class _LocalFileUploadDialogState extends State<LocalFileUploadDialog> {
     try {
       String fileId;
       if (kIsWeb) {
-        // On web, use bytes
         if (_pickedFile!.bytes == null) {
           throw Exception('File bytes are unavailable on web');
         }
-        print('Uploading file (web): ${_pickedFile!.name}');
         fileId = await provider.importLocalFile(
           fileName: _pickedFile!.name,
           fileBytes: _pickedFile!.bytes!,
@@ -59,22 +57,18 @@ class _LocalFileUploadDialogState extends State<LocalFileUploadDialog> {
         if (_pickedFile!.path == null) {
           throw Exception('File path is unavailable on non-web platform');
         }
-        print('Uploading file (non-web): ${_pickedFile!.path}');
         fileId = await provider.importLocalFile(
           filePath: _pickedFile!.path!,
         );
       }
-      print('File uploaded successfully, fileId: $fileId');
 
-      // Link the file to the knowledge base
-      print('Linking file to knowledge base: $fileId');
       await provider.linkFileToKnowledgeBase(
         knowledgeBaseId: widget.knowledgeBaseId,
         fileId: fileId,
         fileName: _pickedFile!.name,
       );
       print('File linked successfully');
-
+      await provider.fetchKnowledgeUnits(widget.knowledgeBaseId);
       Navigator.pop(context); // Close dialog
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Upload and linking completed!')),

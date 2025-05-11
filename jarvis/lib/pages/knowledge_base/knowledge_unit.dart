@@ -49,7 +49,7 @@ class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
   Widget build(BuildContext context) {
     return Drawer(
       backgroundColor: Colors.white,
-      width: MediaQuery.of(context).size.width * 0.7,
+      width: MediaQuery.of(context).size.width * 1,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

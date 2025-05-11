@@ -35,7 +35,7 @@ class MessageTile extends StatelessWidget {
               CircleAvatar(
                 backgroundImage: AssetImage(
                   isAI
-                      ? (aiLogo ?? 'assets/logos/default_ai.png')
+                      ? (aiLogo ?? 'assets/assets/logos/default_ai.png')
                       : 'assets/logos/user_avatar.png',
                 ),
                 radius: 18,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/models/assistant.dart';
+import 'package:jarvis/models/knowledge.dart';
 import 'package:jarvis/services/api/assistants_api_service.dart';
 
 class AssistantProvider with ChangeNotifier {
@@ -11,10 +12,12 @@ class AssistantProvider with ChangeNotifier {
   List<Assistant> _assistants = [];
   bool _isLoading = false;
   String? _errorMessage;
+  List<Knowledge> _assistantKBs = [];
 
   List<Assistant> get assistants => _assistants;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  List<Knowledge> get assistantKBs => _assistantKBs;
 
   Future<void> fetchAssistants({
     String? query,
@@ -95,6 +98,60 @@ class AssistantProvider with ChangeNotifier {
     } catch (e) {
       print('Update assistant failed: $e');
       _errorMessage = 'Failed to update assistant.';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> fetchAssistantKnowledges(
+    String assistantId,{
+    String? query,
+    String? order,
+    String? orderField,
+    bool? isFavorite,
+    bool? isPublic,
+    int offset = 0,
+    int limit = 20,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _assistantKBs = await _apiService.getKnowledgesInAssistant(
+        assistantId,
+        query: query,
+        order: order,
+        order_field: orderField,
+        isFavorite: isFavorite,
+        isPublic: isPublic,
+        offset: offset,
+        limit: limit,
+      );
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> importKBToAssistant(String assistantId, String knowledgeId) async {
+    try {
+      await _apiService.importKnowledgeToAssistant(assistantId, knowledgeId);
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to import knowledge to assistant.';
+      notifyListeners();
+      return false;
+    }
+  }
+  Future<bool> removeKBFromAssistant(String assistantId, String knowledgeId) async {
+    try {
+      await _apiService.removeKnowledgeFromAssistant(assistantId, knowledgeId);
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to remove knowledge to assistant.';
       notifyListeners();
       return false;
     }

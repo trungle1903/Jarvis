@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/components/sideBar.dart';
+import 'package:jarvis/pages/assistants/assistant_knowledge_drawer.dart';
 import 'package:jarvis/pages/assistants/create_assistant_dialog.dart';
 import 'package:jarvis/pages/assistants/edit_assistant_dialog.dart';
 import 'package:jarvis/providers/assistants_provider.dart';
@@ -45,6 +46,32 @@ class _AssistantsPageState extends State<AssistantsPage> {
               : selectedFilter == "Sort by Date"
               ? 'createdAt'
               : null,
+    );
+  }
+
+  void _openAssistantKnowledgeDrawer(BuildContext context, String id, String name) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Assistant Knowledge Drawer',
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: AssistantKnowledgeDrawer(
+            assistantId: id,
+            assistantName: name,
+            onClose: () => Navigator.of(context).pop(),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween(begin: const Offset(1, 0), end: Offset.zero);
+        return SlideTransition(
+          position: tween.animate(animation),
+          child: child,
+        );
+      },
     );
   }
 
@@ -164,113 +191,118 @@ class _AssistantsPageState extends State<AssistantsPage> {
                         return Card.outlined(
                           margin: EdgeInsets.symmetric(vertical: 8),
                           color: Colors.white,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 16,
-                              horizontal: 24,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      assistant.assistantName,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                          child: InkWell(
+                            onTap: () {
+                              _openAssistantKnowledgeDrawer(context, assistant.id, assistant.assistantName);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 16,
+                                horizontal: 24,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        assistant.assistantName,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {},
-                                          icon: Icon(
-                                            Icons.star,
-                                            color: Colors.yellow,
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          IconButton(
+                                            onPressed: () {},
+                                            icon: Icon(
+                                              Icons.star,
+                                              color: Colors.yellow,
+                                            ),
                                           ),
-                                        ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            final result = await showDialog(
-                                              context: context,
-                                              builder:
-                                                  (context) =>
-                                                      EditAssistantDialog(
-                                                        assistant: assistant,
+                                          IconButton(
+                                            onPressed: () async {
+                                              final result = await showDialog(
+                                                context: context,
+                                                builder:
+                                                    (context) =>
+                                                        EditAssistantDialog(
+                                                          assistant: assistant,
+                                                        ),
+                                              );
+                                              if (result == true) {
+                                                _refreshAssistants();
+                                              }
+                                            },
+                                            icon: Icon(
+                                              Icons.edit,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            onPressed: () async {
+                                              final confirm = await showDialog<
+                                                bool
+                                              >(
+                                                context: context,
+                                                builder:
+                                                    (context) => AlertDialog(
+                                                      title: Text(
+                                                        'Delete Assistant',
                                                       ),
-                                            );
-                                            if (result == true) {
-                                              _refreshAssistants();
-                                            }
-                                          },
-                                          icon: Icon(
-                                            Icons.edit,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            final confirm = await showDialog<
-                                              bool
-                                            >(
-                                              context: context,
-                                              builder:
-                                                  (context) => AlertDialog(
-                                                    title: Text(
-                                                      'Delete Assistant',
+                                                      content: Text(
+                                                        'Are you sure you want to delete this assistant?',
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed:
+                                                              () => Navigator.pop(
+                                                                context,
+                                                                false,
+                                                              ),
+                                                          child: Text('Cancel'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed:
+                                                              () => Navigator.pop(
+                                                                context,
+                                                                true,
+                                                              ),
+                                                          child: Text('Delete'),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    content: Text(
-                                                      'Are you sure you want to delete this assistant?',
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed:
-                                                            () => Navigator.pop(
-                                                              context,
-                                                              false,
-                                                            ),
-                                                        child: Text('Cancel'),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed:
-                                                            () => Navigator.pop(
-                                                              context,
-                                                              true,
-                                                            ),
-                                                        child: Text('Delete'),
-                                                      ),
-                                                    ],
-                                                  ),
-                                            );
-                                            if (confirm == true) {
-                                              await provider.api
-                                                  .deleteAssistant(
-                                                    assistant.id,
-                                                  );
-                                              _refreshAssistants();
-                                            }
-                                          },
-                                          icon: Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.red,
+                                              );
+                                              if (confirm == true) {
+                                                await provider.api
+                                                    .deleteAssistant(
+                                                      assistant.id,
+                                                    );
+                                                _refreshAssistants();
+                                              }
+                                            },
+                                            icon: Icon(
+                                              Icons.delete_outline,
+                                              color: Colors.red,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  assistant.instructions,
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    assistant.instructions,
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          )
                         );
                       },
                     );

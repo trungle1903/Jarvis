@@ -2,47 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/components/gradient_button.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/knowledge_base/knowledge_soure.dart';
+import 'package:jarvis/providers/assistants_provider.dart';
 import 'package:jarvis/providers/kb_provider.dart';
 import 'package:provider/provider.dart';
 
-class KnowledgeUnitDrawer extends StatefulWidget {
-  final String knowledgeBaseId;
-  final String title;
-  final String description;
+class AssistantKnowledgeDrawer extends StatefulWidget {
+  final String assistantId;
+  final String assistantName;
   final VoidCallback onClose;
 
-  const KnowledgeUnitDrawer({
+  const AssistantKnowledgeDrawer({
     super.key,
-    required this.knowledgeBaseId,
-    required this.title,
-    required this.description,
+    required this.assistantId,
+    required this.assistantName,
     required this.onClose,
   });
 
   @override
-  _KnowledgeUnitDrawerState createState() => _KnowledgeUnitDrawerState();
+  _AssistantKnowledgeDrawerState createState() => _AssistantKnowledgeDrawerState();
 }
 
-class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
+class _AssistantKnowledgeDrawerState extends State<AssistantKnowledgeDrawer> {
+  
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<KnowledgeBaseProvider>(context, listen: false);
-      provider.fetchKnowledgeUnits(widget.knowledgeBaseId);
+      final assistantProvider = Provider.of<AssistantProvider>(context, listen: false);
+      final knowledgeProvider = Provider.of<KnowledgeBaseProvider>(context, listen: false);
+      assistantProvider.fetchAssistantKnowledges(widget.assistantId);
+      knowledgeProvider.fetchKnowledges();
     });
   }
 
-  IconData _getIconForUnitType(String type) {
-    switch (type) {
-      case 'pdf':
-        return Icons.picture_as_pdf;
-      case 'docx':
-        return Icons.description;
-      default:
-        return Icons.insert_drive_file;
-    }
+  void _refreshAssistantKnowledgeBases() {
+    Provider.of<AssistantProvider>(context, listen: false).fetchAssistantKnowledges(widget.assistantId,
+      query: _searchController.text,
+    );
   }
 
   @override
@@ -58,7 +56,7 @@ class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
               backgroundColor: Colors.white,
               elevation: 0,
               title: Text(
-                widget.title,
+                'Knowledge Base for Assistant ${widget.assistantName}',
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
               ),
               automaticallyImplyLeading: false,
@@ -76,14 +74,14 @@ class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.description, style: const TextStyle(color: jvSubText, fontSize: 15, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 20),
                     Row(
                       children: [
                         Expanded(
                           child: TextField(
+                            controller: _searchController,
+                            onSubmitted: (_) => _refreshAssistantKnowledgeBases(),
                             decoration: InputDecoration(
-                              hintText: "Search units...",
+                              hintText: "Search knowledge base...",
                               prefixIcon: const Icon(Icons.search),
                               filled: true,
                               fillColor: jvGrey,
@@ -94,49 +92,41 @@ class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
                               ),
                             ),
                             onChanged: (value) {
-                              Provider.of<KnowledgeBaseProvider>(context, listen: false)
-                                  .searchUnits(value);
                             },
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        GradientElevatedButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => KnowledgeSourceDialog(knowledgeBaseId: widget.knowledgeBaseId),
-                            ).then((_) {
-                              Provider.of<KnowledgeBaseProvider>(context, listen: false).fetchKnowledgeUnits(widget.knowledgeBaseId);
-                            });
-                          },
-                          text: "+ Add",
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Consumer<KnowledgeBaseProvider>(
-                      builder: (context, provider, child) {
-                        if (provider.isLoading) {
+                    Consumer2<AssistantProvider, KnowledgeBaseProvider>(
+                      builder: (context, assistantProvider, knowledgeProvider, child) {
+                        if (assistantProvider.isLoading || knowledgeProvider.isLoading) {
                           return const Center(child: CircularProgressIndicator(),);
                         }
 
-                        if (provider.errorMessage != null) {
-                          return Center(child: Text('Error: ${provider.errorMessage}'),);
+                        if (assistantProvider.errorMessage != null) {
+                          return Center(child: Text('Error: ${assistantProvider.errorMessage}'),);
                         }
 
-                        final units = provider.units;
-                        if (units.isEmpty) {
+                        if (knowledgeProvider.errorMessage != null) {
+                          return Center(child: Text('Error: ${knowledgeProvider.errorMessage}'),);
+                        }
+
+                        final knowledges = knowledgeProvider.knowledges;
+                        final assistantKnowledges = assistantProvider.assistantKBs;
+                        if (knowledges.isEmpty) {
                           return Center(
-                            child: Text('No units found', textAlign: TextAlign.center, style: TextStyle(color: jvSubText),),
+                            child: Text('No knowledge base found', textAlign: TextAlign.center, style: TextStyle(color: jvSubText),),
                           );
                         }
 
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: units.length,
+                          itemCount: knowledges.length,
                           itemBuilder: (context, index) {
-                            final unit = units[index];
+                            final knowledge = knowledges[index];
+                            final isImported = assistantKnowledges.any((k) => k.knowledgeName == knowledge.knowledgeName);
                             return Card.outlined(
                               color: Colors.white,
                               shape: RoundedRectangleBorder(
@@ -145,18 +135,15 @@ class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
                               ),
                               margin: const EdgeInsets.symmetric(vertical: 8),
                               child: ListTile(
-                                leading: Icon(_getIconForUnitType(unit.type), color: jvDeepBlue),
-                                title: Text(unit.name, style: TextStyle(fontWeight: FontWeight.bold),),
-                                subtitle: Text("${unit.size.toStringAsFixed(2)} KB", style: TextStyle(fontSize: 12, color: Colors.grey),),
-                                trailing: Row(
+                                title: Text(knowledge.knowledgeName, style: TextStyle(fontWeight: FontWeight.bold),),
+                                subtitle: Text(knowledge.description, style: TextStyle(fontSize: 12, color: Colors.grey),),
+                                trailing: isImported? Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Switch(
-                                      activeColor: jvBlue,
-                                      value: unit.enabled,
-                                      onChanged: (value) {
-                                        provider.toggleUnitEnabled(widget.knowledgeBaseId, unit.id, value);
-                                      },
+                                    Badge(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                      label: Text('Imported'),
+                                      backgroundColor: jvBlue,
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete, color: Colors.red),
@@ -165,8 +152,8 @@ class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
                                           context: context,
                                           builder: 
                                             (context) => AlertDialog(
-                                              title: Text('Delete Knowledge Base'),
-                                              content: Text('Are you sure you want to delete this unit?'),
+                                              title: Text('Remove Knowledge Base'),
+                                              content: Text('Are you sure you want to remove knowledge base from assistant?'),
                                               actions: [
                                                 TextButton(
                                                   onPressed: () => Navigator.pop(context, false), 
@@ -180,13 +167,29 @@ class _KnowledgeUnitDrawerState extends State<KnowledgeUnitDrawer> {
                                             )
                                         );
                                         if (confirm == true) {
-                                        await provider.deleteUnit(widget.knowledgeBaseId, unit.id);
-                                        provider.fetchKnowledgeUnits(widget.knowledgeBaseId);
+                                          await assistantProvider.removeKBFromAssistant(
+                                            widget.assistantId,
+                                            knowledge.id,
+                                          );
+                                          await assistantProvider.fetchAssistantKnowledges(
+                                            widget.assistantId,
+                                          );
                                       }
                                     },
                                     ),
                                   ],
-                                ),
+                                ) : IconButton(
+                                      icon: const Icon(Icons.add, color: jvBlue),
+                                      onPressed: () async {
+                                        await assistantProvider.importKBToAssistant(
+                                          widget.assistantId,
+                                          knowledge.id,
+                                        );
+                                        await assistantProvider.fetchAssistantKnowledges(
+                                          widget.assistantId,
+                                        );
+                                      },
+                                    ),
                               ),
                             );
                           },

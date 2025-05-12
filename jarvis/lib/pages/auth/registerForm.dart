@@ -61,6 +61,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   Text("Already have an account? "),
                   GestureDetector(
                     onTap: () {
+                      authProvider.clearError();
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => SignInApp()),
@@ -214,6 +215,9 @@ class _RegisterFormState extends State<RegisterForm> {
                   return null;
                 },
               ),
+              SizedBox(height: 10),
+              if (authProvider.error != null)
+                Text(authProvider.error!, style: TextStyle(color: Colors.red)),
               SizedBox(height: 20),
               TextButton(
                 onPressed:

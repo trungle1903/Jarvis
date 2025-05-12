@@ -49,6 +49,7 @@ class _LoginFormState extends State<LoginForm> {
                   Text("Don't have an account? "),
                   GestureDetector(
                     onTap: () {
+                      authProvider.clearError();
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => SignUpApp()),

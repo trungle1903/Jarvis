@@ -149,4 +149,9 @@ class AuthProvider with ChangeNotifier {
       ),
     );
   }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
 }

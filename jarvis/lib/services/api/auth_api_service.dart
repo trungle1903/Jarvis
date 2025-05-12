@@ -48,7 +48,7 @@ class AuthApiService {
         data: {
           'email': email,
           'password': password,
-          'verification_callback_url': 'https://call-back-url.com/',
+          'verification_callback_url': "https://auth.dev.jarvis.cx/handler/email-verification?after_auth_return_to=%2Fauth%2Fsignin%3Fclient_id%3Djarvis_chat%26redirect%3Dhttps%253A%252F%252Fchat.dev.jarvis.cx%252Fauth%252Foauth%252Fsuccess",
         },
         options: Options(headers: _headerService.baseHeaders),
       );

@@ -16,6 +16,7 @@ import 'package:jarvis/services/api/email_api_service.dart';
 import 'package:jarvis/services/api/kb_api_service.dart';
 import 'package:jarvis/services/api/prompt_api_service.dart';
 import 'package:jarvis/services/header_service.dart';
+import 'package:jarvis/services/iap_manager.dart';
 import 'package:jarvis/services/storage.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
@@ -86,6 +87,9 @@ void main() async {
                 EmailApiService(dio: dio, headerService: headerService),
               ),
         ),
+        ChangeNotifierProvider(
+          create: (context) => IAPManager(),
+        )
       ],
       child: MyApp(),
     ),

@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:jarvis/components/sideBar.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/pages/pricing_page/pricing_plan_card.dart';
+import 'package:jarvis/services/ad_manager.dart';
+import 'package:flutter/foundation.dart';
+import 'package:jarvis/services/iap_manager.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PricingPage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -33,7 +38,9 @@ class PricingPage extends StatelessWidget {
           },
         ),
       ),
-      body: SingleChildScrollView(
+      body: Consumer<IAPManager>(
+          builder: (context, iapManager, child) {
+      return SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -73,8 +80,15 @@ class PricingPage extends StatelessWidget {
                       {'text': 'Ai Action Injection'},
                       {'text': 'Select Text for AI Action'},
                     ],
-                    buttonText: 'Sign up to subscribe',
-                    onPressed: () {},
+                    buttonText: 'Subscribe Now',
+                    onPressed: () async {
+                      const url = 'https://dev.jarvis.cx/pricing';
+                      if (await canLaunchUrl(Uri.parse(url))) {
+                        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                      } else {
+                        throw 'Could not launch $url';
+                      }
+                    },
                     buttonTextColor: jvDeepBlue,
                     buttonBgColor: jvGrey,
                   ),
@@ -90,25 +104,40 @@ class PricingPage extends StatelessWidget {
                       {'text': 'AI Action Injection'},
                       {'text': 'Select Text for AI Action'},
                     ],
-                    buttonText: 'Sign up to subscribe',
-                    onPressed: () {},
+                    buttonText: 'Subscribe Now',
+                    onPressed: () {if (!kIsWeb) {AdManager.showInterstitialAd(context);}},
                     buttonTextColor: Colors.white,
                     buttonBgColor: jvBlue,
                   ),
                   PricingPlanCard(
                     title: 'Pro Annually',
-                    price: '1-month Free Trial',
+                    price: iapManager.products.isNotEmpty
+                        ? iapManager.products[0].price
+                        : '1-month Free Trial',
                     features: [
                       {
                         'text': 'AI Chat Models',
-                        'subText':
-                            'GPT-3.5 & GPT-4.0/Turbo & Gemini Pro & Gemini Ultra',
+                        'subText': 'GPT-3.5 & GPT-4.0/Turbo & Gemini Pro & Gemini Ultra',
                       },
                       {'text': 'AI Action Injection'},
                       {'text': 'Select Text for AI Action'},
                     ],
-                    buttonText: 'Sign up to subscribe',
-                    onPressed: () {},
+                    buttonText: iapManager.loading
+                        ? 'Processing...'
+                        : 'Subscribe Now',
+                    onPressed: iapManager.loading || iapManager.products.isEmpty
+                        ? () {}
+                        : () {
+                            if (!kIsWeb && iapManager.isAvailable) {
+                              iapManager.buyProduct(iapManager.products[0]);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('In-App Purchase is not available'),
+                                ),
+                              );
+                            }
+                          },
                     buttonTextColor: Colors.white,
                     buttonBgColor: Colors.amber,
                   ),
@@ -123,6 +152,8 @@ class PricingPage extends StatelessWidget {
             ],
           ),
         ),
+      );
+          },
       ),
     );
   }

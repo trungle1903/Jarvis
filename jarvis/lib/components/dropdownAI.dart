@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/models/assistant.dart';
+import 'package:jarvis/models/bot.dart';
 
 class DropdownAI extends StatefulWidget {
-  final List<Assistant> assistants;
-  final Assistant currentAssistant;
-  final ValueChanged<Assistant> onChange;
+  final List<Bot> assistants;
+  final Bot currentAssistant;
+  final ValueChanged<Bot> onChange;
   final double iconSize;
   final bool showText;
 
@@ -22,7 +22,7 @@ class DropdownAI extends StatefulWidget {
 }
 
 class _DropdownAIState extends State<DropdownAI> {
-  late Assistant _selectedAssistant;
+  late Bot _selectedAssistant;
 
   @override
   void initState() {
@@ -43,9 +43,13 @@ class _DropdownAIState extends State<DropdownAI> {
   String _getLogoForModel(String model) {
     switch (model) {
       case 'gemini-1.5-flash-latest':
-        return 'assets/logos/gemini.png';
+        return 'assets/logos/gemini-flash.png';
+      case 'gemini-1.5-pro-latest':
+        return 'assets/logos/gemini-pro.png';
+      case 'gpt-4o':
+        return 'assets/logos/gpt.jpg';
       case 'gpt-4o-mini':
-        return 'assets/logos/gpt.png';
+        return 'assets/logos/gpt-mini.png';
       default:
         return 'assets/logos/default_ai.png';
     }
@@ -54,20 +58,23 @@ class _DropdownAIState extends State<DropdownAI> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: PopupMenuButton<Assistant>(
+      child: PopupMenuButton<Bot>(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16.0)),
         ),
         itemBuilder: (context) {
           return widget.assistants.map((assistant) {
-            return PopupMenuItem<Assistant>(
+            return PopupMenuItem<Bot>(
               value: assistant,
               child: Row(
                 children: [
-                  Image.asset(
+                  ClipOval(
+                    child: Image.asset(
                     _getLogoForModel(assistant.id),
-                    width: widget.iconSize,
-                    height: widget.iconSize,
+                    width: 30,
+                    height: 30,
+                    fit: BoxFit.cover,
+                    ),
                   ),
                   SizedBox(width: 12),
                   Text(
@@ -88,10 +95,13 @@ class _DropdownAIState extends State<DropdownAI> {
         },
         child: Row(
           children: [
-            Image.asset(
+            ClipOval(
+              child: Image.asset(
               _getLogoForModel(_selectedAssistant.id),
               width: 30,
               height: 30,
+              fit: BoxFit.cover,
+              ),
             ),
             Icon(Icons.arrow_drop_up),
           ],

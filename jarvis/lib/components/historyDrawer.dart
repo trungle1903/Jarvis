@@ -1,7 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis/providers/chat_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
-class HistoryDrawer extends StatelessWidget {
+class HistoryDrawer extends StatefulWidget {
   const HistoryDrawer({super.key});
+
+  @override
+  State<HistoryDrawer> createState() => _HistoryDrawerState();
+}
+
+class _HistoryDrawerState extends State<HistoryDrawer> {
+  bool _isFirstLoad = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isFirstLoad) {
+      _isFirstLoad = false;
+      Future.microtask(() {
+        context.read<ChatProvider>().loadHistory();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,21 +45,40 @@ class HistoryDrawer extends StatelessWidget {
             ],
           ),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(8.0),
-              children: [
-                _buildHistoryItem(
-                  "Dumb dumb chat 0",
-                  "30 minutes ago",
-                  context,
-                ),
-                _buildHistoryItem(
-                  "Dumb dumb chat 1",
-                  "4 hours ago",
-                  context,
-                  isCurrent: true,
-                ),
-              ],
+            child: Consumer<ChatProvider>(
+              builder: (context, chatProvider, child) {
+                if (chatProvider.isLoading) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (chatProvider.error != null) {
+                  return Center(child: Text('Error: ${chatProvider.error}'));
+                }
+                if (chatProvider.history.isEmpty) {
+                  return Center(child: Text('History empty'));
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.all(8),
+                  itemCount: chatProvider.history.length,
+                  itemBuilder: (context, index) {
+                    final conversation = chatProvider.history[index];
+                    final isCurrent =
+                        conversation.id == chatProvider.conversationId;
+                    return _buildHistoryItem(
+                      conversation.title,
+                      timeago.format(conversation.createdAt),
+                      context,
+                      isCurrent: isCurrent,
+                      onTap: () {
+                        context.read<ChatProvider>().loadConversation(
+                          conversation.id,
+                        );
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
@@ -50,6 +90,7 @@ class HistoryDrawer extends StatelessWidget {
     String title,
     String time,
     BuildContext context, {
+    required VoidCallback onTap,
     bool isCurrent = false,
   }) {
     return Card(
@@ -87,7 +128,7 @@ class HistoryDrawer extends StatelessWidget {
             ),
           ],
         ),
-        onTap: () {},
+        onTap: onTap,
       ),
     );
   }

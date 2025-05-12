@@ -61,6 +61,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   Text("Already have an account? "),
                   GestureDetector(
                     onTap: () {
+                      authProvider.clearError();
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => SignInApp()),
@@ -122,7 +123,11 @@ class _RegisterFormState extends State<RegisterForm> {
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'You have to enter your email.';
+                    return 'Please enter your email';
+                  }
+                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  if (!emailRegex.hasMatch(value)) {
+                    return 'Please enter a valid email address';
                   }
                   return null;
                 },
@@ -210,6 +215,9 @@ class _RegisterFormState extends State<RegisterForm> {
                   return null;
                 },
               ),
+              SizedBox(height: 10),
+              if (authProvider.error != null)
+                Text(authProvider.error!, style: TextStyle(color: Colors.red)),
               SizedBox(height: 20),
               TextButton(
                 onPressed:
